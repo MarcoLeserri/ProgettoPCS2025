@@ -32,9 +32,17 @@ int main(int argc, char *argv[])
 	{
 		if ((abs(b) < err and  c >= 1) or  (abs(c) < err and  b >= 1)) // Class I
 		{
-		// 
+		// Class I 
+		
+		
+		
+		
+		
+		
+		
+		
 		}
-		elseif( abs(b-c) < err) {
+		else if(abs(b-c) < err) {
 		// polyhedrons of II Class 
 		}
 		else {
