@@ -70,13 +70,13 @@ bool ImportCell1Ds(Polygonal& mesh)
     double err = 1.0e-16;
 	string Filename;
 	if (abs(q-3) < err) {
-		Filename = "./Cell0TDs.csv"
+		Filename = "./Cell1TDs.csv"
 	}
 	else if (abs(q-3) < err) {
-		Filename = "./Cell0ODs.csv"
+		Filename = "./Cell1ODs.csv"
 	}
 	else if (abs(q-5) < err) {
-		Filename = "./Cell0IDs.csv"
+		Filename = "./Cell1IDs.csv"
 	}	
 
     ifstream file(Filename);
@@ -127,13 +127,13 @@ bool ImportCell2Ds(Polygonal& mesh)
 	double err = 1.0e-16;
 	string Filename;
 	if (abs(q-3) < err) {
-		Filename = "./Cell0TDs.csv"
+		Filename = "./Cell2TDs.csv"
 	}
 	else if (abs(q-3) < err) {
-		Filename = "./Cell0ODs.csv"
+		Filename = "./Cell2ODs.csv"
 	}
 	else if (abs(q-5) < err) {
-		Filename = "./Cell0IDs.csv"
+		Filename = "./Cell2IDs.csv"
 	}	
 
     ifstream file;
