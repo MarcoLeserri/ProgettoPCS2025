@@ -10,6 +10,23 @@ using namespace PolygonalLibrary;
 
 namespace PolygonalLibrary{
 
+bool ImportMesh(PolygonalMesh& mesh)
+{
+
+    if(!ImportCell0Ds(mesh))
+        return false;
+
+    if(!ImportCell1Ds(mesh))
+        return false;
+
+    if(!ImportCell2Ds(mesh))
+        return false;
+
+    return true;
+
+}
+
+
 bool ImportCell0Ds(Polygonal& mesh, int q)
 {	
 	double err = 1.0e-16;
@@ -213,7 +230,7 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 			CoordFace[0] = X;
 			CoordFace[1] = Y;
 			CoordFace[2] = Z;
-			VertFace[to_string(i + 1)] = CoordFace;
+			VertFace[to_string(i)] = CoordFace;
 		}
 		TriangFaceC_1(meshTriang, IdFace, CoordFace, n);
 	}
@@ -252,15 +269,33 @@ bool TrianfFaceC_1(Polygonal& meshTriang, int IdFace, map<int, array<double, 3>>
 		meshTriang.Cell2DsID.push_back(i);
 	}
 	
-	array<double, 3> CoordA = VertFace["1"]
-	array<double, 3> CoordB = VertFace["2"]
-	array<double, 3> CoordC = VertFace["3"]
-	
 	//triangolazione lati
-	for( unsigned int i = 0; i < n ;i++){
-		double AddX = abs(CoordA[0] - CoordB[0]) / n;
-		double AddY = abs(CoordA[1] - CoordB[1]) / n;
-		double AddZ = abs(CoordA[2] - CoordB[2]) / n;
+	Cell0DsCoordinates[0][0] = VertFace["1"][0];
+	Cell0DsCoordinates[0][1] = VertFace["1"][1];
+	Cell0DsCoordinates[0][2] = VertFace["1"][2];
+
+	double AddX01 = abs(VertFace["0"][0] - VertFace["1"][0]) / n;
+	double AddY01 = abs(VertFace["0"][1] - VertFace["1"][1]) / n;
+	double AddZ01 = abs(VertFace["0"][2] - VertFace["1"][2]) / n;
+
+	double AddX12 = abs(VertFace["2"][0] - VertFace["1"][0]) / n;
+	double AddY12 = abs(VertFace["2"][1] - VertFace["1"][1]) / n;
+	double AddZ12 = abs(VertFace["2"][2] - VertFace["1"][2]) / n;
+	
+	double X0 = VertFace["1"][0];
+	double Y0 = VertFace["1"][1];
+	double Z0 = VertFace["1"][2];
+	for( unsigned int i = 1; i < n + 1; i++){
+		
+	}
+
+}
+		
+		
+		
+		
+		
+		
 		
 		
 	}
