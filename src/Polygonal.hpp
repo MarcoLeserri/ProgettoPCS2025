@@ -1,7 +1,7 @@
-s#pragma once
+#pragma once
 
 #include <iostream>
-#include "Eigen/Eigen"
+#include "Eigen/Eigen"s
 
 using namespace std;
 using namespace Eigen;

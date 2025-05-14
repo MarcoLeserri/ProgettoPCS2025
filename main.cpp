@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include "Polygonal.hpp"
 #include "Eigen/Eigen"
-#include "PolygonalMesh.hpp"
 #include "Utils.hpp"
 #include "UCDUtilities.hpp"
 #include <iostream>
@@ -16,7 +16,7 @@ using namespace PolygonalLibrary;
 
 int main(int argc, char *argv[])
 {	
-	double err = 1.0e-16
+	double err = 1.0e-16;
 	if (argc < 5)
 	{
 		cerr << "Error: insert at least four values" << endl; 
@@ -64,7 +64,3 @@ int main(int argc, char *argv[])
 	}
 		
 	
-
-
-
-	Polygonal mesh

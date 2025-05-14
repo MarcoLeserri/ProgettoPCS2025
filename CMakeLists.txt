@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
 
-# facsimile is the project name
 project(Polygonal LANGUAGES C CXX VERSION 1.0.0)
 
 # Set C++ Standard

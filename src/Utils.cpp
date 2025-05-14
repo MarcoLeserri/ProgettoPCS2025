@@ -2,7 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include "Utils.hpp"
-#include<map>
+#include "Eigen/Eigen"
+#include <map>
 
 using namespace std;
 using namespace Eigen;
@@ -271,8 +272,8 @@ bool TrianfFaceC_1(Polygonal& meshTriang, int IdFace, map<int, array<double, 3>>
 	
 	//triangolazione lati
 	Cell0DsCoordinates[0][0] = VertFace["1"][0];
-	Cell0DsCoordinates[0][1] = VertFace["1"][1];
-	Cell0DsCoordinates[0][2] = VertFace["1"][2];
+	Cell0DsCoordinates[1][0] = VertFace["1"][1];
+	Cell0DsCoordinates[2][0] = VertFace["1"][2];
 
 	double AddX01 = abs(VertFace["0"][0] - VertFace["1"][0]) / n;
 	double AddY01 = abs(VertFace["0"][1] - VertFace["1"][1]) / n;
@@ -285,18 +286,92 @@ bool TrianfFaceC_1(Polygonal& meshTriang, int IdFace, map<int, array<double, 3>>
 	double X0 = VertFace["1"][0];
 	double Y0 = VertFace["1"][1];
 	double Z0 = VertFace["1"][2];
+	int Id = 1;
+	
 	for( unsigned int i = 1; i < n + 1; i++){
 		
+		if(VertFace["1"][0] < VertFace["0"][0]){
+			double XEstrS = X0 + ( i * AddX01);
+		}
+		else{
+			double XEstrS = X0 + ( (n - i) * AddX01);
+		}
+		
+		if(VertFace["1"][1] < VertFace["0"][1]){
+			double YEstrS = Y0 + ( i * AddY01);
+		}
+		else{
+			double YEstrS = Y0 + ( (n - i) * AddY01);
+		}
+		
+		if(VertFace["1"][2] < VertFace["0"][2]){
+			double ZEstrS = Z0 + ( i * AddZ01);
+		}
+		else{
+			double ZEstrS = Z0 + ( (n - i) * AddZ01);
+		}
+		
+		if(VertFace["1"][0] < VertFace["2"][0]){
+			double XEstrD = X0 + ( i * AddX12);
+		}
+		else{
+			double XEstrD = X0 + ( (n - i) * AddX12);
+		}
+		
+		if(VertFace["1"][1] < VertFace["2"][1]){
+			double YEstrD = Y0 + ( i * AddY12);
+		}
+		else{
+			double YEstrD = Y0 + ( (n - i) * AddY12);
+		}
+		
+		if(VertFace["1"][2] < VertFace["2"][2]){
+			double ZEstrD = Z0 + ( i * AddZ12);
+		}
+		else{
+			double ZEstrD = Z0 + ( (n - i) * AddZ12);
+		}
+		
+		Cell0DsCoordinates[0][Id] = XEstrS;
+		Cell0DsCoordinates[1][Id] = YEstrS;
+		Cell0DsCoordinates[2][Id] = ZEstrS;
+		Id += 1;
+		
+		double DistEstX = abs( XEstrS - XEstrD) / i;
+		double DistEstY = abs( YEstrS - YEstrD) / i;
+		double DistEstZ = abs( ZEstrS - ZEstrD) / i;
+			
+		for( unsigned int j = 1; j < i; j++){
+			
+			if(XEstrS < XEstrD){
+				Cell0DsCoordinates[0][Id] = XEstrS + ( j * DistEstX );
+			}
+			else{
+				Cell0DsCoordinates[0][Id] = XEstrS + ( (i - j) * DistEstX );
+			}
+			
+			if(YEstrS < YEstrD){
+				Cell0DsCoordinates[1][Id] = YEstrS + ( j * DistEstY );
+			}
+			else{
+				Cell0DsCoordinates[1][Id] = YEstrS + ( (i - j) * DistEstY );
+			}
+			
+			if(ZEstrS < ZEstrD){
+				Cell0DsCoordinates[2][Id] = ZEstrS + ( j * DistEstZ );
+			}
+			else{
+				Cell0DsCoordinates[2][Id] = ZEstrS + ( (i - j) * DistEstZ );
+			}
+			Id += 1;
+		}
+		
+		Cell0DsCoordinates[0][Id] = XEstrD;
+		Cell0DsCoordinates[1][Id] = YEstrD;
+		Cell0DsCoordinates[2][Id] = ZEstrD;
+		Id += 1;
+	
 	}
+	return true;
 
-}
-		
-		
-		
-		
-		
-		
-		
-		
-	}
 }
