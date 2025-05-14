@@ -9,11 +9,11 @@ using namespace PolygonalLibrary;
 
 namespace PolygonalLibrary
 {
-bool ImportMesh(Polygonal& mesh);
-bool ImportCell0Ds(Polygonal& mesh);
-bool ImportCell1Ds(Polygonal& mesh);
-bool ImportCell2Ds(Polygonal& mesh);
+bool ImportMesh(Polygonal& mesh, int q);
+bool ImportCell0Ds(Polygonal& mesh, int q);
+bool ImportCell1Ds(Polygonal& mesh, int q);
+bool ImportCell2Ds(Polygonal& mesh, int q);
 }
 
-bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang)
-bool TrianfFaceC_1(Polygonal& meshTriang, int IdFace, map<int, array<double, 3>> VertFace, int n);
+bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang);
+bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<char, array<double, 3>> VertFace, int n);

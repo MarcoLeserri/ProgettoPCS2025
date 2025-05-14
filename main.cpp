@@ -4,7 +4,6 @@
 #include "Polygonal.hpp"
 #include "Eigen/Eigen"
 #include "Utils.hpp"
-#include "UCDUtilities.hpp"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -36,7 +35,7 @@ int main(int argc, char *argv[])
 			Polygonal PolygTriang;
 			
 			//importa i dati
-			if(!ImportMesh(Polygon)){
+			if(!ImportMesh(Polygon, q)){
 				cerr << "Error: file not found" << endl;
 				return 1;
 			}
@@ -62,5 +61,6 @@ int main(int argc, char *argv[])
 	else {
 		cerr << "Error: values out of range" << endl;
 	}
+}
 		
 	

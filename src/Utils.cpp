@@ -11,16 +11,16 @@ using namespace PolygonalLibrary;
 
 namespace PolygonalLibrary{
 
-bool ImportMesh(PolygonalMesh& mesh)
+bool ImportMesh(Polygonal& mesh, int q)
 {
 
-    if(!ImportCell0Ds(mesh))
+    if(!ImportCell0Ds(mesh, q))
         return false;
 
-    if(!ImportCell1Ds(mesh))
+    if(!ImportCell1Ds(mesh, q))
         return false;
 
-    if(!ImportCell2Ds(mesh))
+    if(!ImportCell2Ds(mesh, q))
         return false;
 
     return true;
@@ -33,13 +33,13 @@ bool ImportCell0Ds(Polygonal& mesh, int q)
 	double err = 1.0e-16;
 	string Filename;
 	if (abs(q-3) < err) {
-		Filename = "./Cell0TDs.csv"
+		Filename = "./Cell0TDs.csv";
 	}
 	else if (abs(q-3) < err) {
-		Filename = "./Cell0ODs.csv"
+		Filename = "./Cell0ODs.csv";
 	}
 	else if (abs(q-5) < err) {
-		Filename = "./Cell0IDs.csv"
+		Filename = "./Cell0IDs.csv";
 	}	
 	
 	
@@ -84,18 +84,18 @@ bool ImportCell0Ds(Polygonal& mesh, int q)
 }
 // ***************************************************************************
 
-bool ImportCell1Ds(Polygonal& mesh)
+bool ImportCell1Ds(Polygonal& mesh, int q)
 {
     double err = 1.0e-16;
 	string Filename;
 	if (abs(q-3) < err) {
-		Filename = "./Cell1TDs.csv"
+		Filename = "./Cell1TDs.csv";
 	}
 	else if (abs(q-3) < err) {
-		Filename = "./Cell1ODs.csv"
+		Filename = "./Cell1ODs.csv";
 	}
 	else if (abs(q-5) < err) {
-		Filename = "./Cell1IDs.csv"
+		Filename = "./Cell1IDs.csv";
 	}	
 
     ifstream file(Filename);
@@ -140,19 +140,19 @@ bool ImportCell1Ds(Polygonal& mesh)
 }
 
 // ***************************************************************************
-bool ImportCell2Ds(Polygonal& mesh)
+bool ImportCell2Ds(Polygonal& mesh, int q)
 {
 	
 	double err = 1.0e-16;
 	string Filename;
 	if (abs(q-3) < err) {
-		Filename = "./Cell2TDs.csv"
+		Filename = "./Cell2TDs.csv";
 	}
 	else if (abs(q-3) < err) {
-		Filename = "./Cell2ODs.csv"
+		Filename = "./Cell2ODs.csv";
 	}
 	else if (abs(q-5) < err) {
-		Filename = "./Cell2IDs.csv"
+		Filename = "./Cell2IDs.csv";
 	}	
 
     ifstream file;
@@ -177,7 +177,7 @@ bool ImportCell2Ds(Polygonal& mesh)
         return false;
     }
 
-    mesh.Cell2DsId.reserve(mesh.NumCell2Ds);
+    mesh.Cell2DsID.reserve(mesh.NumCell2Ds);
     mesh.Cell2DsVertices.reserve(mesh.NumCell2Ds);
     mesh.Cell2DsEdges.reserve(mesh.NumCell2Ds);
 
@@ -198,13 +198,164 @@ bool ImportCell2Ds(Polygonal& mesh)
         for(unsigned int i = 0; i < 3; i++)
             converter >> edges[i];
 
-        mesh.Cell2DsId.push_back(id);
+        mesh.Cell2DsID.push_back(id);
         mesh.Cell2DsVertices.push_back(vertices);
         mesh.Cell2DsEdges.push_back(edges);
     }
 
     return true;
 }
+
+}
+
+bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<char, array<double, 3>> VertFace, int n){
+	int numPunti;
+	for( int i = 0; i < n + 1; i++){
+		numPunti += (i + 1);
+	}
+	
+	int numEdges;
+	for( int i = 1; i < n + 1; i++){
+		numEdges += (3 * i);
+	}
+	
+	int numFaces = n * n;
+	
+	meshTriang.NumCell0Ds = numPunti;
+	meshTriang.NumCell1Ds = numEdges;
+	meshTriang.NumCell2Ds = numFaces;
+	
+	meshTriang.Cell0DsID.reserve(meshTriang.NumCell0Ds);
+    meshTriang.Cell0DsCoordinates = Eigen::MatrixXd::Zero(3, meshTriang.NumCell0Ds);
+    meshTriang.Cell1DsID.reserve(meshTriang.NumCell1Ds);
+    meshTriang.Cell1DsExtrema = Eigen::MatrixXi(2, meshTriang.NumCell1Ds);
+    meshTriang.Cell2DsID.reserve(meshTriang.NumCell2Ds);
+    meshTriang.Cell2DsVertices.reserve(meshTriang.NumCell2Ds);
+    meshTriang.Cell2DsEdges.reserve(meshTriang.NumCell2Ds);
+
+	
+	for( int i = 0; i < numPunti; i++){
+		meshTriang.Cell0DsID.push_back(i);
+	}
+	
+	for( int i = 0; i < numEdges; i++){
+		meshTriang.Cell1DsID.push_back(i);
+	}
+	
+	for( int i = 0; i < numFaces; i++){
+		meshTriang.Cell2DsID.push_back(i);
+	}
+	
+	//triangolazione lati
+	meshTriang.Cell0DsCoordinates(0,0) = VertFace['1'][0];
+	meshTriang.Cell0DsCoordinates(1,0) = VertFace['1'][1];
+	meshTriang.Cell0DsCoordinates(2,0) = VertFace['1'][2];
+
+	double AddX01 = abs(VertFace['0'][0] - VertFace['1'][0]) / n;
+	double AddY01 = abs(VertFace['0'][1] - VertFace['1'][1]) / n;
+	double AddZ01 = abs(VertFace['0'][2] - VertFace['1'][2]) / n;
+
+	double AddX12 = abs(VertFace['2'][0] - VertFace['1'][0]) / n;
+	double AddY12 = abs(VertFace['2'][1] - VertFace['1'][1]) / n;
+	double AddZ12 = abs(VertFace['2'][2] - VertFace['1'][2]) / n;
+	
+	double X0 = VertFace['1'][0];
+	double Y0 = VertFace['1'][1];
+	double Z0 = VertFace['1'][2];
+	int Id = 1;
+	
+	for( int i = 1; i < n + 1; i++){
+		
+		double XEstrS;
+		double YEstrS;
+		double ZEstrS;
+		double XEstrD;
+		double YEstrD;
+		double ZEstrD;
+		
+		if(VertFace['1'][0] < VertFace['0'][0]){
+			XEstrS = X0 + ( i * AddX01);
+		}
+		else{
+			XEstrS = X0 + ( (n - i) * AddX01);
+		}
+		
+		if(VertFace['1'][1] < VertFace['0'][1]){
+			YEstrS = Y0 + ( i * AddY01);
+		}
+		else{
+			YEstrS = Y0 + ( (n - i) * AddY01);
+		}
+		
+		if(VertFace['1'][2] < VertFace['0'][2]){
+			ZEstrS = Z0 + ( i * AddZ01);
+		}
+		else{
+			ZEstrS = Z0 + ( (n - i) * AddZ01);
+		}
+		
+		if(VertFace['1'][0] < VertFace['2'][0]){
+			XEstrD = X0 + ( i * AddX12);
+		}
+		else{
+			XEstrD = X0 + ( (n - i) * AddX12);
+		}
+		
+		if(VertFace['1'][1] < VertFace['2'][1]){
+			YEstrD = Y0 + ( i * AddY12);
+		}
+		else{
+			YEstrD = Y0 + ( (n - i) * AddY12);
+		}
+		
+		if(VertFace['1'][2] < VertFace['2'][2]){
+			ZEstrD = Z0 + ( i * AddZ12);
+		}
+		else{
+			ZEstrD = Z0 + ( (n - i) * AddZ12);
+		}
+		
+		meshTriang.Cell0DsCoordinates(0,Id) = XEstrS;
+		meshTriang.Cell0DsCoordinates(1,Id) = YEstrS;
+		meshTriang.Cell0DsCoordinates(2,Id) = ZEstrS;
+		Id += 1;
+		
+		double DistEstX = abs( XEstrS - XEstrD) / i;
+		double DistEstY = abs( YEstrS - YEstrD) / i;
+		double DistEstZ = abs( ZEstrS - ZEstrD) / i;
+			
+		for( int j = 1; j < i; j++){
+			
+			if(XEstrS < XEstrD){
+				meshTriang.Cell0DsCoordinates(0,Id) = XEstrS + ( j * DistEstX );
+			}
+			else{
+				meshTriang.Cell0DsCoordinates(0,Id) = XEstrS + ( (i - j) * DistEstX );
+			}
+			
+			if(YEstrS < YEstrD){
+				meshTriang.Cell0DsCoordinates(1,Id) = YEstrS + ( j * DistEstY );
+			}
+			else{
+				meshTriang.Cell0DsCoordinates(1,Id) = YEstrS + ( (i - j) * DistEstY );
+			}
+			
+			if(ZEstrS < ZEstrD){
+				meshTriang.Cell0DsCoordinates(2,Id) = ZEstrS + ( j * DistEstZ );
+			}
+			else{
+				meshTriang.Cell0DsCoordinates(2,Id) = ZEstrS + ( (i - j) * DistEstZ );
+			}
+			Id += 1;
+		}
+		
+		meshTriang.Cell0DsCoordinates(0,Id) = XEstrD;
+		meshTriang.Cell0DsCoordinates(1,Id) = YEstrD;
+		meshTriang.Cell0DsCoordinates(2,Id) = ZEstrD;
+		Id += 1;
+	
+	}
+	return true;
 
 }
 
@@ -217,23 +368,23 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 	else if(abs(c) < err)
 		n = b;
 		
-	int numFaces = length(mesh.Cell2DsVertices); //numero di facce nel poligono
+	int numFaces = mesh.Cell2DsVertices.size(); //numero di facce nel poligono
 	array<double, 3> CoordFace;
 	
-	for( unsigned int i = 0; i < numFaces; i++){
+	for( int i = 0; i < numFaces; i++){
 		int IdFace = i;
-		map<int, array<double, 3>> VertFace;
-		for( unsigned int j = 0; j < 3; j++){
+		map<char, array<double, 3>> VertFace;
+		for( int j = 0; j < 3; j++){
 			int IdVert = mesh.Cell2DsVertices[i][j];
-			double X = mesh.Cell0DsCoordinates[IdVert][0];
-			double Y = mesh.Cell0DsCoordinates[IdVert][1];
-			double Z = mesh.Cell0DsCoordinates[IdVert][2];
+			double X = mesh.Cell0DsCoordinates(IdVert,0);
+			double Y = mesh.Cell0DsCoordinates(IdVert,1);
+			double Z = mesh.Cell0DsCoordinates(IdVert,2);
 			CoordFace[0] = X;
 			CoordFace[1] = Y;
 			CoordFace[2] = Z;
-			VertFace[to_string(i)] = CoordFace;
+			VertFace[j] = CoordFace;
 		}
-		TriangFaceC_1(meshTriang, IdFace, CoordFace, n);
+		TriangFaceC_1(meshTriang, IdFace, VertFace, n);
 	}
 	//stampate i txt
 	
@@ -241,137 +392,3 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 	return true;
 }
 
-bool TrianfFaceC_1(Polygonal& meshTriang, int IdFace, map<int, array<double, 3>> VertFace, int n){
-	int numPunti;
-	for( unsigned int i = 0; i < b + 1; i++){
-		numPunti += (i + 1);
-	}
-	
-	int numEdges;
-	for( unsigned int i = 1; i < b + 1; i++){
-		numEdges += (3 * i);
-	}
-	
-	int numFaces = n * n;
-	
-	meshTriang.numCell0Ds = numPunti;
-	meshTriang.numCell1Ds = numEdges;
-	meshTriang.numCell2Ds = numFaces;
-	
-	for( unsigned int i = 0; i < numPunti; i++){
-		meshTriang.Cell0DsID.push_back(i);
-	}
-	
-	for( unsigned int i = 0; i < numEdges; i++){
-		meshTriang.Cell1DsID.push_back(i);
-	}
-	
-	for( unsigned int i = 0; i < numFaces; i++){
-		meshTriang.Cell2DsID.push_back(i);
-	}
-	
-	//triangolazione lati
-	Cell0DsCoordinates[0][0] = VertFace["1"][0];
-	Cell0DsCoordinates[1][0] = VertFace["1"][1];
-	Cell0DsCoordinates[2][0] = VertFace["1"][2];
-
-	double AddX01 = abs(VertFace["0"][0] - VertFace["1"][0]) / n;
-	double AddY01 = abs(VertFace["0"][1] - VertFace["1"][1]) / n;
-	double AddZ01 = abs(VertFace["0"][2] - VertFace["1"][2]) / n;
-
-	double AddX12 = abs(VertFace["2"][0] - VertFace["1"][0]) / n;
-	double AddY12 = abs(VertFace["2"][1] - VertFace["1"][1]) / n;
-	double AddZ12 = abs(VertFace["2"][2] - VertFace["1"][2]) / n;
-	
-	double X0 = VertFace["1"][0];
-	double Y0 = VertFace["1"][1];
-	double Z0 = VertFace["1"][2];
-	int Id = 1;
-	
-	for( unsigned int i = 1; i < n + 1; i++){
-		
-		if(VertFace["1"][0] < VertFace["0"][0]){
-			double XEstrS = X0 + ( i * AddX01);
-		}
-		else{
-			double XEstrS = X0 + ( (n - i) * AddX01);
-		}
-		
-		if(VertFace["1"][1] < VertFace["0"][1]){
-			double YEstrS = Y0 + ( i * AddY01);
-		}
-		else{
-			double YEstrS = Y0 + ( (n - i) * AddY01);
-		}
-		
-		if(VertFace["1"][2] < VertFace["0"][2]){
-			double ZEstrS = Z0 + ( i * AddZ01);
-		}
-		else{
-			double ZEstrS = Z0 + ( (n - i) * AddZ01);
-		}
-		
-		if(VertFace["1"][0] < VertFace["2"][0]){
-			double XEstrD = X0 + ( i * AddX12);
-		}
-		else{
-			double XEstrD = X0 + ( (n - i) * AddX12);
-		}
-		
-		if(VertFace["1"][1] < VertFace["2"][1]){
-			double YEstrD = Y0 + ( i * AddY12);
-		}
-		else{
-			double YEstrD = Y0 + ( (n - i) * AddY12);
-		}
-		
-		if(VertFace["1"][2] < VertFace["2"][2]){
-			double ZEstrD = Z0 + ( i * AddZ12);
-		}
-		else{
-			double ZEstrD = Z0 + ( (n - i) * AddZ12);
-		}
-		
-		Cell0DsCoordinates[0][Id] = XEstrS;
-		Cell0DsCoordinates[1][Id] = YEstrS;
-		Cell0DsCoordinates[2][Id] = ZEstrS;
-		Id += 1;
-		
-		double DistEstX = abs( XEstrS - XEstrD) / i;
-		double DistEstY = abs( YEstrS - YEstrD) / i;
-		double DistEstZ = abs( ZEstrS - ZEstrD) / i;
-			
-		for( unsigned int j = 1; j < i; j++){
-			
-			if(XEstrS < XEstrD){
-				Cell0DsCoordinates[0][Id] = XEstrS + ( j * DistEstX );
-			}
-			else{
-				Cell0DsCoordinates[0][Id] = XEstrS + ( (i - j) * DistEstX );
-			}
-			
-			if(YEstrS < YEstrD){
-				Cell0DsCoordinates[1][Id] = YEstrS + ( j * DistEstY );
-			}
-			else{
-				Cell0DsCoordinates[1][Id] = YEstrS + ( (i - j) * DistEstY );
-			}
-			
-			if(ZEstrS < ZEstrD){
-				Cell0DsCoordinates[2][Id] = ZEstrS + ( j * DistEstZ );
-			}
-			else{
-				Cell0DsCoordinates[2][Id] = ZEstrS + ( (i - j) * DistEstZ );
-			}
-			Id += 1;
-		}
-		
-		Cell0DsCoordinates[0][Id] = XEstrD;
-		Cell0DsCoordinates[1][Id] = YEstrD;
-		Cell0DsCoordinates[2][Id] = ZEstrD;
-		Id += 1;
-	
-	}
-	return true;
-
-}
