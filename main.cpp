@@ -32,7 +32,17 @@ int main(int argc, char *argv[])
 	{
 		if ((abs(b) < err and  c >= 1) or  (abs(c) < err and  b >= 1)) // Class I
 		{
-		// Class I 
+			Polygonal Polygon;
+			Polygonal PolygTriang;
+			
+			//importa i dati
+			if(!ImportMesh(Polygon)){
+				cerr << "Error: file not found" << endl;
+				return 1;
+			}
+			
+			//triangolazione poligono
+			TriangTotC_1(b, c, Polygon, PolygTriang);
 		
 		
 		
