@@ -35,7 +35,7 @@ bool ImportCell0Ds(Polygonal& mesh, int q)
 	if (abs(q-3) < err) {
 		Filename = "./Cell0TDs.csv";
 	}
-	else if (abs(q-3) < err) {
+	else if (abs(q-4) < err) {
 		Filename = "./Cell0ODs.csv";
 	}
 	else if (abs(q-5) < err) {
@@ -68,7 +68,7 @@ bool ImportCell0Ds(Polygonal& mesh, int q)
 
     for (const string& line : listLines)
     {
-        istringstream converter(line); // istringstream legge id,  coord x e y 
+        istringstream converter(line); // istringstream legge id,  coord x e y e z 
 		stringstream s(line);
 		string value;
 		getline(s, value, ';');
@@ -78,6 +78,8 @@ bool ImportCell0Ds(Polygonal& mesh, int q)
 		mesh.Cell0DsCoordinates(0, id) = stod(value);
 		getline(s, value, ';');
 		mesh.Cell0DsCoordinates(1, id) = stod(value);
+		getline(s, value, ';');
+		mesh.Cell0DsCoordinates(2, id) = stod(value);
 
     }
     return true;
@@ -91,7 +93,7 @@ bool ImportCell1Ds(Polygonal& mesh, int q)
 	if (abs(q-3) < err) {
 		Filename = "./Cell1TDs.csv";
 	}
-	else if (abs(q-3) < err) {
+	else if (abs(q-4) < err) {
 		Filename = "./Cell1ODs.csv";
 	}
 	else if (abs(q-5) < err) {
@@ -148,7 +150,7 @@ bool ImportCell2Ds(Polygonal& mesh, int q)
 	if (abs(q-3) < err) {
 		Filename = "./Cell2TDs.csv";
 	}
-	else if (abs(q-3) < err) {
+	else if (abs(q-4) < err) {
 		Filename = "./Cell2ODs.csv";
 	}
 	else if (abs(q-5) < err) {
@@ -188,15 +190,21 @@ bool ImportCell2Ds(Polygonal& mesh, int q)
         unsigned int id;
         array<unsigned int, 3> vertices;
         array<unsigned int, 3> edges;
-		unsigned int m;
 
-        converter >>  id;
-		converter >> m;
-        for(unsigned int i = 0; i < 3; i++)
-            converter >> vertices[i];
-		converter >> m;
-        for(unsigned int i = 0; i < 3; i++)
-            converter >> edges[i];
+        string val;
+        getline(converter, val, ';'); 
+        id = stoi(val);
+        
+		getline(converter, val, ';');
+        for( int i = 0; i < 3; i++){
+        	getline(converter, val, ';');
+            vertices[i] = stoi(val);
+        }
+		getline(converter, val, ';');
+        for( int i = 0; i < 3; i++){
+            getline(converter, val, ';');
+            edges[i] = stoi(val);
+        }
 
         mesh.Cell2DsID.push_back(id);
         mesh.Cell2DsVertices.push_back(vertices);
@@ -208,21 +216,21 @@ bool ImportCell2Ds(Polygonal& mesh, int q)
 
 }
 
-bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<char, array<double, 3>> VertFace, int n){
-	int numPunti;
+bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<string, array<double, 3>> VertFace, int n, int Face){
+	int numPunti = 0;
 	for( int i = 0; i < n + 1; i++){
 		numPunti += (i + 1);
 	}
 	
-	int numEdges;
+	int numEdges = 0;
 	for( int i = 1; i < n + 1; i++){
 		numEdges += (3 * i);
 	}
 	
 	int numFaces = n * n;
 	
-	meshTriang.NumCell0Ds = numPunti;
-	meshTriang.NumCell1Ds = numEdges;
+	meshTriang.NumCell0Ds = numPunti * numFaces;
+	meshTriang.NumCell1Ds = numEdges * numFaces;
 	meshTriang.NumCell2Ds = numFaces;
 	
 	meshTriang.Cell0DsID.reserve(meshTriang.NumCell0Ds);
@@ -235,7 +243,7 @@ bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<char, array<double, 3>
 
 	
 	for( int i = 0; i < numPunti; i++){
-		meshTriang.Cell0DsID.push_back(i);
+		meshTriang.Cell0DsID.push_back(i + numPunti * Face);
 	}
 	
 	for( int i = 0; i < numEdges; i++){
@@ -247,22 +255,26 @@ bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<char, array<double, 3>
 	}
 	
 	//triangolazione lati
-	meshTriang.Cell0DsCoordinates(0,0) = VertFace['1'][0];
-	meshTriang.Cell0DsCoordinates(1,0) = VertFace['1'][1];
-	meshTriang.Cell0DsCoordinates(2,0) = VertFace['1'][2];
-
-	double AddX01 = abs(VertFace['0'][0] - VertFace['1'][0]) / n;
-	double AddY01 = abs(VertFace['0'][1] - VertFace['1'][1]) / n;
-	double AddZ01 = abs(VertFace['0'][2] - VertFace['1'][2]) / n;
-
-	double AddX12 = abs(VertFace['2'][0] - VertFace['1'][0]) / n;
-	double AddY12 = abs(VertFace['2'][1] - VertFace['1'][1]) / n;
-	double AddZ12 = abs(VertFace['2'][2] - VertFace['1'][2]) / n;
+	int Id = 0;
 	
-	double X0 = VertFace['1'][0];
-	double Y0 = VertFace['1'][1];
-	double Z0 = VertFace['1'][2];
-	int Id = 1;
+	meshTriang.Cell0DsCoordinates(0,Id + numPunti * Face) = VertFace["1"][0];
+	meshTriang.Cell0DsCoordinates(1,Id + numPunti * Face) = VertFace["1"][1];
+	meshTriang.Cell0DsCoordinates(2,Id + numPunti * Face) = VertFace["1"][2];
+
+	double AddX01 = abs(VertFace["0"][0] - VertFace["1"][0]) / n;
+	double AddY01 = abs(VertFace["0"][1] - VertFace["1"][1]) / n;
+	double AddZ01 = abs(VertFace["0"][2] - VertFace["1"][2]) / n;
+
+	double AddX12 = abs(VertFace["2"][0] - VertFace["1"][0]) / n;
+	double AddY12 = abs(VertFace["2"][1] - VertFace["1"][1]) / n;
+	double AddZ12 = abs(VertFace["2"][2] - VertFace["1"][2]) / n;
+	
+	double X0 = VertFace["1"][0];
+	double Y0 = VertFace["1"][1];
+	double Z0 = VertFace["1"][2];
+	Id += 1;
+	
+	cout << X0<<Y0<<Z0<<endl;
 	
 	for( int i = 1; i < n + 1; i++){
 		
@@ -273,51 +285,51 @@ bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<char, array<double, 3>
 		double YEstrD;
 		double ZEstrD;
 		
-		if(VertFace['1'][0] < VertFace['0'][0]){
+		if(VertFace["1"][0] < VertFace["0"][0]){
 			XEstrS = X0 + ( i * AddX01);
 		}
 		else{
-			XEstrS = X0 + ( (n - i) * AddX01);
+			XEstrS = X0 - ( i * AddX01);
 		}
 		
-		if(VertFace['1'][1] < VertFace['0'][1]){
+		if(VertFace["1"][1] < VertFace["0"][1]){
 			YEstrS = Y0 + ( i * AddY01);
 		}
 		else{
-			YEstrS = Y0 + ( (n - i) * AddY01);
+			YEstrS = Y0 - ( i * AddY01);
 		}
 		
-		if(VertFace['1'][2] < VertFace['0'][2]){
+		if(VertFace["1"][2] < VertFace["0"][2]){
 			ZEstrS = Z0 + ( i * AddZ01);
 		}
 		else{
-			ZEstrS = Z0 + ( (n - i) * AddZ01);
+			ZEstrS = Z0 - ( i * AddZ01);
 		}
 		
-		if(VertFace['1'][0] < VertFace['2'][0]){
+		if(VertFace["1"][0] < VertFace["2"][0]){
 			XEstrD = X0 + ( i * AddX12);
 		}
 		else{
-			XEstrD = X0 + ( (n - i) * AddX12);
+			XEstrD = X0 - ( i * AddX12);
 		}
 		
-		if(VertFace['1'][1] < VertFace['2'][1]){
+		if(VertFace["1"][1] < VertFace["2"][1]){
 			YEstrD = Y0 + ( i * AddY12);
 		}
 		else{
-			YEstrD = Y0 + ( (n - i) * AddY12);
+			YEstrD = Y0 - ( i * AddY12);
 		}
 		
-		if(VertFace['1'][2] < VertFace['2'][2]){
+		if(VertFace["1"][2] < VertFace["2"][2]){
 			ZEstrD = Z0 + ( i * AddZ12);
 		}
 		else{
-			ZEstrD = Z0 + ( (n - i) * AddZ12);
+			ZEstrD = Z0 - ( i * AddZ12);
 		}
 		
-		meshTriang.Cell0DsCoordinates(0,Id) = XEstrS;
-		meshTriang.Cell0DsCoordinates(1,Id) = YEstrS;
-		meshTriang.Cell0DsCoordinates(2,Id) = ZEstrS;
+		meshTriang.Cell0DsCoordinates(0,Id + numPunti * Face) = XEstrS;
+		meshTriang.Cell0DsCoordinates(1,Id + numPunti * Face) = YEstrS;
+		meshTriang.Cell0DsCoordinates(2,Id + numPunti * Face) = ZEstrS;
 		Id += 1;
 		
 		double DistEstX = abs( XEstrS - XEstrD) / i;
@@ -327,31 +339,31 @@ bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<char, array<double, 3>
 		for( int j = 1; j < i; j++){
 			
 			if(XEstrS < XEstrD){
-				meshTriang.Cell0DsCoordinates(0,Id) = XEstrS + ( j * DistEstX );
+				meshTriang.Cell0DsCoordinates(0,Id + numPunti * Face) = XEstrS + ( j * DistEstX );
 			}
 			else{
-				meshTriang.Cell0DsCoordinates(0,Id) = XEstrS + ( (i - j) * DistEstX );
+				meshTriang.Cell0DsCoordinates(0,Id + numPunti * Face) = XEstrS - ( j * DistEstX );
 			}
 			
 			if(YEstrS < YEstrD){
-				meshTriang.Cell0DsCoordinates(1,Id) = YEstrS + ( j * DistEstY );
+				meshTriang.Cell0DsCoordinates(1,Id + numPunti * Face) = YEstrS + ( j * DistEstY );
 			}
 			else{
-				meshTriang.Cell0DsCoordinates(1,Id) = YEstrS + ( (i - j) * DistEstY );
+				meshTriang.Cell0DsCoordinates(1,Id + numPunti * Face) = YEstrS - ( j* DistEstY );
 			}
 			
 			if(ZEstrS < ZEstrD){
-				meshTriang.Cell0DsCoordinates(2,Id) = ZEstrS + ( j * DistEstZ );
+				meshTriang.Cell0DsCoordinates(2,Id + numPunti * Face) = ZEstrS + ( j * DistEstZ );
 			}
 			else{
-				meshTriang.Cell0DsCoordinates(2,Id) = ZEstrS + ( (i - j) * DistEstZ );
+				meshTriang.Cell0DsCoordinates(2,Id + numPunti * Face) = ZEstrS - ( j * DistEstZ );
 			}
 			Id += 1;
 		}
 		
-		meshTriang.Cell0DsCoordinates(0,Id) = XEstrD;
-		meshTriang.Cell0DsCoordinates(1,Id) = YEstrD;
-		meshTriang.Cell0DsCoordinates(2,Id) = ZEstrD;
+		meshTriang.Cell0DsCoordinates(0,Id + numPunti * Face) = XEstrD;
+		meshTriang.Cell0DsCoordinates(1,Id + numPunti * Face) = YEstrD;
+		meshTriang.Cell0DsCoordinates(2,Id + numPunti * Face) = ZEstrD;
 		Id += 1;
 	
 	}
@@ -371,20 +383,25 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 	int numFaces = mesh.Cell2DsVertices.size(); //numero di facce nel poligono
 	array<double, 3> CoordFace;
 	
+	cout <<numFaces<<endl;
+	
 	for( int i = 0; i < numFaces; i++){
 		int IdFace = i;
-		map<char, array<double, 3>> VertFace;
+		map<string, array<double, 3>> VertFace;
 		for( int j = 0; j < 3; j++){
 			int IdVert = mesh.Cell2DsVertices[i][j];
 			double X = mesh.Cell0DsCoordinates(0,IdVert);
 			double Y = mesh.Cell0DsCoordinates(1,IdVert);
 			double Z = mesh.Cell0DsCoordinates(2,IdVert);
+			
 			CoordFace[0] = X;
 			CoordFace[1] = Y;
 			CoordFace[2] = Z;
-			VertFace[j] = CoordFace;
+			VertFace[to_string(j)] = CoordFace;
 		}
-		TriangFaceC_1(meshTriang, IdFace, VertFace, n);
+		
+		int Face = i;
+		TriangFaceC_1(meshTriang, IdFace, VertFace, n, Face);
 	}
 	//stampate i txt
 	

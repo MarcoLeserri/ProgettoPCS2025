@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 	int q = stoi(argv[2]);
 	int b = stoi(argv[3]);
 	int c = stoi(argv[4]);
-	
+		
 	if (abs(p-3) < err and  q >= 3)
 	{
 		if ((abs(b) < err and  c >= 1) or  (abs(c) < err and  b >= 1)) // Class I
@@ -42,6 +42,25 @@ int main(int argc, char *argv[])
 			
 			//triangolazione poligono
 			TriangTotC_1(b, c, Polygon, PolygTriang);
+			for (int i = 0; i < PolygTriang.Cell0DsID.size(); i++) {
+        	cout << PolygTriang.Cell0DsID[i] << endl;
+    		}
+    		
+    		for (int i = 0; i < PolygTriang.Cell0DsCoordinates.rows(); ++i) {
+        		for (int j = 0; j < PolygTriang.Cell0DsCoordinates.cols(); ++j) {
+            		cout << fixed << setprecision(16) << PolygTriang.Cell0DsCoordinates(i, j) << " ";
+        		}
+        		cout << endl;
+    		}
+    		
+    		for (int i = 0; i < Polygon.Cell0DsCoordinates.rows(); ++i) {
+        		for (int j = 0; j < Polygon.Cell0DsCoordinates.cols(); ++j) {
+            		cout << fixed << setprecision(16) << Polygon.Cell0DsCoordinates(i, j) << " ";
+        		}
+        		cout << endl;
+    		}
+    		
+    		cout << PolygTriang.NumCell0Ds << " " << PolygTriang.NumCell1Ds << " " <<PolygTriang.NumCell2Ds << endl;
 		
 		
 		

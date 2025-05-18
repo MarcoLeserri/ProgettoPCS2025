@@ -1,6 +1,8 @@
 #pragma once
 
+#include <sstream>
 #include <iostream>
+#include <fstream>
 #include "Polygonal.hpp"
 
 using namespace std;
@@ -16,4 +18,4 @@ bool ImportCell2Ds(Polygonal& mesh, int q);
 }
 
 bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang);
-bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<char, array<double, 3>> VertFace, int n);
+bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<string, array<double, 3>> VertFace, int n, int Face);
