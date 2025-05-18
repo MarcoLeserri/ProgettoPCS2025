@@ -210,9 +210,12 @@ bool ImportCell2Ds(Polygonal& mesh, int q)
 
 bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<char, array<double, 3>> VertFace, int n){
 	int numPunti;
-	int numEdges;
 	for( int i = 0; i < n + 1; i++){
 		numPunti += (i + 1);
+	}
+	
+	int numEdges;
+	for( int i = 1; i < n + 1; i++){
 		numEdges += (3 * i);
 	}
 	
