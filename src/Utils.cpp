@@ -210,12 +210,9 @@ bool ImportCell2Ds(Polygonal& mesh, int q)
 
 bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<char, array<double, 3>> VertFace, int n){
 	int numPunti;
+	int numEdges;
 	for( int i = 0; i < n + 1; i++){
 		numPunti += (i + 1);
-	}
-	
-	int numEdges;
-	for( int i = 1; i < n + 1; i++){
 		numEdges += (3 * i);
 	}
 	
@@ -376,9 +373,9 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 		map<char, array<double, 3>> VertFace;
 		for( int j = 0; j < 3; j++){
 			int IdVert = mesh.Cell2DsVertices[i][j];
-			double X = mesh.Cell0DsCoordinates(IdVert,0);
-			double Y = mesh.Cell0DsCoordinates(IdVert,1);
-			double Z = mesh.Cell0DsCoordinates(IdVert,2);
+			double X = mesh.Cell0DsCoordinates(0,IdVert);
+			double Y = mesh.Cell0DsCoordinates(1,IdVert);
+			double Z = mesh.Cell0DsCoordinates(2,IdVert);
 			CoordFace[0] = X;
 			CoordFace[1] = Y;
 			CoordFace[2] = Z;
