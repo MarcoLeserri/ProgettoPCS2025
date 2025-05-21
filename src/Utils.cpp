@@ -4,6 +4,8 @@
 #include "Utils.hpp"
 #include "Eigen/Eigen"
 #include <map>
+#include <vector>
+#include <iomanip>
 
 using namespace std;
 using namespace Eigen;
@@ -76,6 +78,7 @@ bool ImportCell0Ds(Polygonal& mesh, int q)
 		mesh.Cell0DsID.push_back(id);
 		getline(s, value, ';');
 		mesh.Cell0DsCoordinates(0, id) = stod(value);
+		cout << value << endl;
 		getline(s, value, ';');
 		mesh.Cell0DsCoordinates(1, id) = stod(value);
 		getline(s, value, ';');
@@ -216,160 +219,24 @@ bool ImportCell2Ds(Polygonal& mesh, int q)
 
 }
 
-bool TriangFaceC_1(Polygonal& meshTriang, int IdFace, map<string, array<double, 3>> VertFace, int n, int Face){
-	int numPunti = 0;
-	for( int i = 0; i < n + 1; i++){
-		numPunti += (i + 1);
-	}
-	
-	int numEdges = 0;
-	for( int i = 1; i < n + 1; i++){
-		numEdges += (3 * i);
-	}
-	
-	int numFaces = n * n;
-	
-	meshTriang.NumCell0Ds = numPunti * numFaces;
-	meshTriang.NumCell1Ds = numEdges * numFaces;
-	meshTriang.NumCell2Ds = numFaces;
-	
-	meshTriang.Cell0DsID.reserve(meshTriang.NumCell0Ds);
-    meshTriang.Cell0DsCoordinates = Eigen::MatrixXd::Zero(3, meshTriang.NumCell0Ds);
-    meshTriang.Cell1DsID.reserve(meshTriang.NumCell1Ds);
-    meshTriang.Cell1DsExtrema = Eigen::MatrixXi(2, meshTriang.NumCell1Ds);
-    meshTriang.Cell2DsID.reserve(meshTriang.NumCell2Ds);
-    meshTriang.Cell2DsVertices.reserve(meshTriang.NumCell2Ds);
-    meshTriang.Cell2DsEdges.reserve(meshTriang.NumCell2Ds);
-
-	
-	for( int i = 0; i < numPunti; i++){
-		meshTriang.Cell0DsID.push_back(i + numPunti * Face);
-	}
-	
-	for( int i = 0; i < numEdges; i++){
-		meshTriang.Cell1DsID.push_back(i);
-	}
-	
-	for( int i = 0; i < numFaces; i++){
-		meshTriang.Cell2DsID.push_back(i);
-	}
-	
-	//triangolazione lati
-	int Id = 0;
-	
-	meshTriang.Cell0DsCoordinates(0,Id + numPunti * Face) = VertFace["1"][0];
-	meshTriang.Cell0DsCoordinates(1,Id + numPunti * Face) = VertFace["1"][1];
-	meshTriang.Cell0DsCoordinates(2,Id + numPunti * Face) = VertFace["1"][2];
-
-	double AddX01 = abs(VertFace["0"][0] - VertFace["1"][0]) / n;
-	double AddY01 = abs(VertFace["0"][1] - VertFace["1"][1]) / n;
-	double AddZ01 = abs(VertFace["0"][2] - VertFace["1"][2]) / n;
-
-	double AddX12 = abs(VertFace["2"][0] - VertFace["1"][0]) / n;
-	double AddY12 = abs(VertFace["2"][1] - VertFace["1"][1]) / n;
-	double AddZ12 = abs(VertFace["2"][2] - VertFace["1"][2]) / n;
-	
-	double X0 = VertFace["1"][0];
-	double Y0 = VertFace["1"][1];
-	double Z0 = VertFace["1"][2];
-	Id += 1;
-	
-	cout << X0<<Y0<<Z0<<endl;
-	
-	for( int i = 1; i < n + 1; i++){
-		
-		double XEstrS;
-		double YEstrS;
-		double ZEstrS;
-		double XEstrD;
-		double YEstrD;
-		double ZEstrD;
-		
-		if(VertFace["1"][0] < VertFace["0"][0]){
-			XEstrS = X0 + ( i * AddX01);
-		}
-		else{
-			XEstrS = X0 - ( i * AddX01);
-		}
-		
-		if(VertFace["1"][1] < VertFace["0"][1]){
-			YEstrS = Y0 + ( i * AddY01);
-		}
-		else{
-			YEstrS = Y0 - ( i * AddY01);
-		}
-		
-		if(VertFace["1"][2] < VertFace["0"][2]){
-			ZEstrS = Z0 + ( i * AddZ01);
-		}
-		else{
-			ZEstrS = Z0 - ( i * AddZ01);
-		}
-		
-		if(VertFace["1"][0] < VertFace["2"][0]){
-			XEstrD = X0 + ( i * AddX12);
-		}
-		else{
-			XEstrD = X0 - ( i * AddX12);
-		}
-		
-		if(VertFace["1"][1] < VertFace["2"][1]){
-			YEstrD = Y0 + ( i * AddY12);
-		}
-		else{
-			YEstrD = Y0 - ( i * AddY12);
-		}
-		
-		if(VertFace["1"][2] < VertFace["2"][2]){
-			ZEstrD = Z0 + ( i * AddZ12);
-		}
-		else{
-			ZEstrD = Z0 - ( i * AddZ12);
-		}
-		
-		meshTriang.Cell0DsCoordinates(0,Id + numPunti * Face) = XEstrS;
-		meshTriang.Cell0DsCoordinates(1,Id + numPunti * Face) = YEstrS;
-		meshTriang.Cell0DsCoordinates(2,Id + numPunti * Face) = ZEstrS;
-		Id += 1;
-		
-		double DistEstX = abs( XEstrS - XEstrD) / i;
-		double DistEstY = abs( YEstrS - YEstrD) / i;
-		double DistEstZ = abs( ZEstrS - ZEstrD) / i;
-			
-		for( int j = 1; j < i; j++){
-			
-			if(XEstrS < XEstrD){
-				meshTriang.Cell0DsCoordinates(0,Id + numPunti * Face) = XEstrS + ( j * DistEstX );
-			}
-			else{
-				meshTriang.Cell0DsCoordinates(0,Id + numPunti * Face) = XEstrS - ( j * DistEstX );
-			}
-			
-			if(YEstrS < YEstrD){
-				meshTriang.Cell0DsCoordinates(1,Id + numPunti * Face) = YEstrS + ( j * DistEstY );
-			}
-			else{
-				meshTriang.Cell0DsCoordinates(1,Id + numPunti * Face) = YEstrS - ( j* DistEstY );
-			}
-			
-			if(ZEstrS < ZEstrD){
-				meshTriang.Cell0DsCoordinates(2,Id + numPunti * Face) = ZEstrS + ( j * DistEstZ );
-			}
-			else{
-				meshTriang.Cell0DsCoordinates(2,Id + numPunti * Face) = ZEstrS - ( j * DistEstZ );
-			}
-			Id += 1;
-		}
-		
-		meshTriang.Cell0DsCoordinates(0,Id + numPunti * Face) = XEstrD;
-		meshTriang.Cell0DsCoordinates(1,Id + numPunti * Face) = YEstrD;
-		meshTriang.Cell0DsCoordinates(2,Id + numPunti * Face) = ZEstrD;
-		Id += 1;
-	
-	}
-	return true;
-
+int VerificaEInserisci(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& mappa, Polygonal& mesh) {
+    Coord = Coord / Coord.norm(); // normalizzazione
+    auto it = mappa.find(Coord);
+    if (it != mappa.end()) {
+	    std::cout << "Già presente: " << Coord.transpose() << " → id " << it->second << std::endl;
+        return it->second;
+    } else {
+        int id = mappa.size();
+        mappa[Coord] = id;
+        std::cout << fixed << setprecision(16) << "Inserisco punto " << id << ": " << Coord.transpose() << std::endl;
+        mesh.Cell0DsCoordinates(0, id) = Coord[0];
+        mesh.Cell0DsCoordinates(1, id) = Coord[1];
+        mesh.Cell0DsCoordinates(2, id) = Coord[2];
+        mesh.Cell0DsID.push_back(id);
+        return id;
+    }
 }
+
 
 bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 	
@@ -379,33 +246,105 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 		n = c;
 	else if(abs(c) < err)
 		n = b;
+	else
+		cerr << "Error: both b and c are not zero" << endl;
+		
+	cout << "n è: " << n <<endl;
 		
 	int numFaces = mesh.Cell2DsVertices.size(); //numero di facce nel poligono
-	array<double, 3> CoordFace;
+	cout << "il numero di facce del poligono è: " << numFaces << endl;
+	int NumPuntiF = ( ( n + 1 ) * ( n + 2 ) ) / 2; //numero totale di punti in una faccia
+	cout << "il numero di punti in una faccia è: " << NumPuntiF << endl;
+	meshTriang.NumCell0Ds = NumPuntiF * numFaces; //da cambiare
+	meshTriang.NumCell2Ds = n * n * numFaces;
+	cout << "il numero di facce triangolate è: " << meshTriang.NumCell2Ds << endl;
 	
-	cout <<numFaces<<endl;
+	meshTriang.Cell0DsID.reserve(meshTriang.NumCell0Ds);
+    meshTriang.Cell0DsCoordinates = Eigen::MatrixXd::Zero(3, meshTriang.NumCell0Ds);
+    meshTriang.Cell1DsID.reserve(meshTriang.NumCell1Ds);
+    meshTriang.Cell1DsExtrema = Eigen::MatrixXi(2, meshTriang.NumCell1Ds);
+    meshTriang.Cell2DsID.reserve(meshTriang.NumCell2Ds);
+    meshTriang.Cell2DsVertices.reserve(meshTriang.NumCell2Ds);
+    meshTriang.Cell2DsEdges.reserve(meshTriang.NumCell2Ds);
 	
-	for( int i = 0; i < numFaces; i++){
-		int IdFace = i;
-		map<string, array<double, 3>> VertFace;
-		for( int j = 0; j < 3; j++){
-			int IdVert = mesh.Cell2DsVertices[i][j];
-			double X = mesh.Cell0DsCoordinates(0,IdVert);
-			double Y = mesh.Cell0DsCoordinates(1,IdVert);
-			double Z = mesh.Cell0DsCoordinates(2,IdVert);
-			
-			CoordFace[0] = X;
-			CoordFace[1] = Y;
-			CoordFace[2] = Z;
-			VertFace[to_string(j)] = CoordFace;
-		}
+	
+	map<Vector3d, int, Vector3dComparator> ControlloPunti;
+	Vector3d CoordA; //coordinate A
+	Vector3d CoordB; //coordinate B
+	Vector3d CoordC; //coordinate C
+	Vector3d CoordP; //coordinate nuovo punto
+	array<unsigned int, 3> NewFace;
+	//map< Vector3d, int> ControlloPunti;
 		
-		int Face = i;
-		TriangFaceC_1(meshTriang, IdFace, VertFace, n, Face);
+	for(int k = 0; k < numFaces; k++){
+		
+		int numfaccia = k;
+		
+		int id;
+		id = mesh.Cell2DsVertices[numfaccia][0];
+		cout << id << endl;
+		CoordA[0] = mesh.Cell0DsCoordinates(0,id);
+		CoordA[1] = mesh.Cell0DsCoordinates(1,id);
+		CoordA[2] = mesh.Cell0DsCoordinates(2,id);
+		cout << CoordA[0] << " " << CoordA[1] << " " << CoordA[2] << endl;
+		
+		id = mesh.Cell2DsVertices[numfaccia][1];
+		cout << id << endl;
+		CoordB[0] = mesh.Cell0DsCoordinates(0,id);
+		CoordB[1] = mesh.Cell0DsCoordinates(1,id);
+		CoordB[2] = mesh.Cell0DsCoordinates(2,id);
+		cout << CoordB[0] << " " << CoordB[1] << " " << CoordB[2] << endl;
+		
+		id = mesh.Cell2DsVertices[numfaccia][2];
+		cout << id << endl;
+		CoordC[0] = mesh.Cell0DsCoordinates(0,id);
+		CoordC[1] = mesh.Cell0DsCoordinates(1,id);
+		CoordC[2] = mesh.Cell0DsCoordinates(2,id);
+		cout << CoordC[0] << " " << CoordC[1] << " " << CoordC[2] << endl;
+		
+		for(int i = 0; i < n; i++){ //conteggio piani
+			cout << "Triangoli dritti" << endl;
+			for(int j = 0; j < (n - i); j++){
+				CoordP = ((double(i)/n) * CoordA) + ((double(n - (i + j))/n) * CoordB) + ((double(j)/n) * CoordC);
+				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
+				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
+				NewFace[0] = id;
+				
+				CoordP = ((double(i)/n) * CoordA) + ((double(n - (i + j + 1))/n) * CoordB) + ((double(j + 1)/n) * CoordC);
+				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
+				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
+				NewFace[1] = id;
+				
+				CoordP = ((double(i + 1)/n) * CoordA) + ((double(n - (i + j + 1))/n) * CoordB) + ((double(j)/n) * CoordC);
+				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
+				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
+				NewFace[2] = id;
+
+				meshTriang.Cell2DsVertices.push_back(NewFace);
+			}
+			
+			cout << "Triangoli inversi" << endl;
+			for(int j = 0; j < (n - (i + 1)); j++){
+				CoordP = ((double(i)/n) * CoordA) + ((double(n - (i + j + 1))/n) * CoordB) + ((double(j + 1)/n) * CoordC);
+				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
+				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
+				NewFace[0] = id;
+				
+				CoordP = ((double(i + 1)/n) * CoordA) + ((double(n - (i + j + 2))/n) * CoordB) + ((double(j + 1)/n) * CoordC);
+				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
+				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
+				NewFace[1] = id;
+				
+				CoordP = ((double(i + 1)/n) * CoordA) + ((double(n - (i + j + 1))/n) * CoordB) + ((double(j)/n) * CoordC);
+				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
+				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
+				NewFace[2] = id;
+				
+				meshTriang.Cell2DsVertices.push_back(NewFace);
+			}
+			
+		}
 	}
-	//stampate i txt
-	
-	
+		
 	return true;
 }
-
