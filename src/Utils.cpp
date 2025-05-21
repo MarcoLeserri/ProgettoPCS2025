@@ -298,6 +298,9 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
     meshTriang.Cell2DsVertices.reserve(meshTriang.NumCell2Ds);
     meshTriang.Cell2DsEdges.reserve(meshTriang.NumCell2Ds);
 	
+	for ( unsigned int i = 0; i < meshTriang.NumCell2Ds; i++){
+		meshTriang.Cell2DsID.push_back(i);
+	}
 	
 	map<Vector3d, int, Vector3dComparator> ControlloPunti;
 	map<Vector2i, int, Vector2iComparator> ControlloEdges;
