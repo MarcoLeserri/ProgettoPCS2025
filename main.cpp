@@ -7,6 +7,8 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include "UCDUtilities.hpp"
+
 
 using namespace std;
 using namespace Eigen;
@@ -15,6 +17,9 @@ using namespace PolygonalLibrary;
 
 int main(int argc, char *argv[])
 {	
+	Polygonal Polygon;
+	Polygonal PolygTriang;
+	
 	double err = 1.0e-16;
 	if (argc < 5)
 	{
@@ -30,10 +35,7 @@ int main(int argc, char *argv[])
 	if (abs(p-3) < err and  q >= 3)
 	{
 		if ((abs(b) < err and  c >= 1) or (abs(c) < err and  b >= 1)) // Class I
-		{
-			Polygonal Polygon;
-			Polygonal PolygTriang;
-			
+		{	
 			//importa i dati
 			if(!ImportMesh(Polygon, q)){
 				cerr << "Error: file not found" << endl;
@@ -67,6 +69,23 @@ int main(int argc, char *argv[])
 	else {
 		cerr << "Error: values out of range" << endl;
 	}
+	
+	Gedim::UCDUtilities utilities;
+    {
+        utilities.ExportPoints("./Cell0Ds.inp",
+                               PolygTriang.Cell0DsCoordinates
+                               );
+    }
+
+    {
+        utilities.ExportSegments("./Cell1Ds.inp",
+                                 PolygTriang.Cell0DsCoordinates,
+                                 PolygTriang.Cell1DsExtrema
+                                 );
+    }
+	
+	
+	return 0;
 }
 		
 	

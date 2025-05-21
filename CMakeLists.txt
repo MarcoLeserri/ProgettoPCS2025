@@ -41,6 +41,12 @@ list(APPEND Polygon_SOURCES ${src_sources})
 list(APPEND Polygon_HEADERS ${src_headers})
 list(APPEND Polygon_INCLUDE ${src_includes})
 
+add_subdirectory(ExportParaview)
+
+list(APPEND Polygon_SOURCES ${src_paraview_sources})
+list(APPEND Polygon_HEADERS ${src_paraview_headers})
+list(APPEND Polygon_INCLUDE ${src_paraview_includes})
+
 # Create executable
 ################################################################################
 add_executable(${PROJECT_NAME}
