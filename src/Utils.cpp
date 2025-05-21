@@ -234,7 +234,7 @@ int VerificaEInserisci(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& 
     }
 }
 
-int VerificaEInserisci(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& mappa, PolygonalDual& mesh) {
+int VerificaEInserisciDual(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& mappa, PolygonalDual& mesh) {
     Coord = Coord / Coord.norm(); // normalizzazione
     auto it = mappa.find(Coord);
     if (it != mappa.end()) {
@@ -274,11 +274,12 @@ array<unsigned int, 3> VerificaEInserisci2(array<unsigned int, 3> NewFace, map<V
 	return Face;
 }
 
-vector<unsigned int> VerificaEInserisci2Dual(vector<unsigned int> NewFace, map<Vector2i, int, Vector2iComparator>& mappa, PolygonalDual& mesh, vector<unsigned int>& Face) {
+vector<unsigned int> VerificaEInserisci2Dual(vector<unsigned int> NewFace, map<Vector2i, int, Vector2iComparator>& mappa, Eigen::MatrixXi& Cell1DsExtrema, PolygonalDual& mesh, vector<unsigned int>& Face) {
+	int n = NewFace.size();
     Vector2i Lato;
-    for( int i = 0; i < NewFace.size(); i++){
-	    int a = NewFace[i % 3];
-		int b = NewFace[(i + 1) % 3];
+    for( int i = 0; i < n; i++){
+	    int a = NewFace[i % n];
+		int b = NewFace[(i + 1) % n];
 		Lato << std::min(a, b), std::max(a, b);
 
 	    
@@ -288,8 +289,8 @@ vector<unsigned int> VerificaEInserisci2Dual(vector<unsigned int> NewFace, map<V
 		} else {
 			int id = mappa.size();
 			mappa[Lato] = id;
-			mesh.Cell1DsExtrema(0, id) = Lato[0];
-			mesh.Cell1DsExtrema(1, id) = Lato[1];
+			Cell1DsExtrema(0, id) = Lato[0];
+			Cell1DsExtrema(1, id) = Lato[1];
 			mesh.Cell1DsID.push_back(id);
 			Face.insert(Face.begin() + i, mappa[Lato]);
     		}
@@ -475,50 +476,31 @@ bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 	Vector3d CoordP; //coordinate nuovo punto
 	vector<unsigned int> NewFace;
 	vector<unsigned int> Face;
+	Eigen::MatrixXi Cell1DsExtremaBig(2, 10000);
 		
 	vector<array<unsigned int, 3>> VerticesF = meshTriang.Cell2DsVertices;
 	
-	//DOBBIAMO RISERVARE LO SPAZIO
-	int numFaces = meshTriang.Cell2DsVertices.size();
-	int NumPunti = 0;
-	int NumLati = 0;
-	NumLati += mesh.NumCell1Ds * n;
-	for( int i = 1; i < n; i++){
-		NumLati += i * 3 * numFaces;
-	}
+	int numFaces = meshTriang.NumCell0Ds;
+	int NumPunti = meshTriang.NumCell2Ds;
+	meshDual.NumCell0Ds = NumPunti;
+	meshDual.NumCell2Ds = numFaces;
 	
-	for( int i = 1; i < n - 1; i ++){
-		NumPunti += i * numFaces;
+	meshDual.Cell0DsID.reserve(meshDual.NumCell0Ds);
+    meshDual.Cell0DsCoordinates = Eigen::MatrixXd::Zero(3, meshDual.NumCell0Ds);
+    meshDual.Cell2DsID.reserve(meshDual.NumCell2Ds);
+    meshDual.Cell2DsVertices.reserve(meshDual.NumCell2Ds);
+    meshDual.Cell2DsEdges.reserve(meshDual.NumCell2Ds);
+    
+    for ( unsigned int i = 0; i < meshDual.NumCell2Ds; i++){
+		meshDual.Cell2DsID.push_back(i);
 	}
-	NumPunti += mesh.Cell0DsID.size();
-	NumPunti += mesh.Cell1DsID.size() * (n - 1);
-	meshTriang.NumCell0Ds = NumPunti;
-	meshTriang.NumCell1Ds = NumLati;
-	meshTriang.NumCell2Ds = n * n * numFaces;
-	
-	meshTriang.Cell0DsID.reserve(meshTriang.NumCell0Ds);
-    meshTriang.Cell0DsCoordinates = Eigen::MatrixXd::Zero(3, meshTriang.NumCell0Ds);
-    meshTriang.Cell1DsID.reserve(meshTriang.NumCell1Ds);
-    meshTriang.Cell1DsExtrema = Eigen::MatrixXi(2, meshTriang.NumCell1Ds);
-    meshTriang.Cell2DsID.reserve(meshTriang.NumCell2Ds);
-    meshTriang.Cell2DsVertices.reserve(meshTriang.NumCell2Ds);
-    meshTriang.Cell2DsEdges.reserve(meshTriang.NumCell2Ds);
-    //quello sopra è quello vecchio, dobbiamo contare tutti i lati, i punti e le facce
 	
 	for( int i = 0; i < meshTriang.NumCell0Ds; i++){
+		NewFace.clear();
+		Face.clear();
 		int id = i;
 		int length = VerticesF.size();
 		vector<array<unsigned int, 3>> FacesAd = SearchFaces(id, VerticesF, length);
-		
-		cout << "Le facce che contengono il punto " << id << " sono: " << endl;
-		for (int j = 0; j < FacesAd.size(); j ++) {
-			cout << "Vertici faccia " << j << ": ";
-			for (int k = 0; k < 3; k++) {
-				cout << FacesAd[j][k] << " " ;
-			}
-			cout << endl;
-		}
-		cout <<endl;
 		
 		vector<array<unsigned int, 3>> SortedFaces;
 		int IdOrd = FacesAd[1][1];
@@ -529,16 +511,6 @@ bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 			IdOrd = FacesAd[1][2];
 			SortedFaces = SortFaces(id, IdOrd, FacesAd);
 		}
-		
-		cout << "Le facce ordinate che contengono il punto " << id << " sono: " << endl;
-		for (int j = 0; j < SortedFaces.size(); j ++) {
-			cout << "Vertici faccia " << j << ": ";
-			for (int k = 0; k < 3; k++) {
-				cout << SortedFaces[j][k] << " " ;
-			}
-			cout << endl;
-		}
-		cout <<endl;
 		
 		for( int i = 0; i < SortedFaces.size(); i++){
 			
@@ -559,15 +531,18 @@ bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 			CoordC[2] = meshTriang.Cell0DsCoordinates(2,idPunto);
 			
 			CoordP = (CoordA + CoordB + CoordC) / 3;
-			idPunto = VerificaEInserisci(CoordP, ControlloPunti, meshDual);
+			idPunto = VerificaEInserisciDual(CoordP, ControlloPunti, meshDual);
 			NewFace.push_back(idPunto);
 		}
-		
 		meshDual.Cell2DsVertices.push_back(NewFace);
-		Face = VerificaEInserisci2Dual(NewFace, ControlloEdges, meshDual, Face);
+		Face = VerificaEInserisci2Dual(NewFace, ControlloEdges, Cell1DsExtremaBig, meshDual, Face);
 		meshDual.Cell2DsEdges.push_back(Face);
 		
 	}
+	int m = meshDual.Cell1DsID.size();
+	meshDual.Cell1DsExtrema = Eigen::MatrixXi(2, m);
+	meshDual.Cell1DsExtrema = Cell1DsExtremaBig.leftCols(m);
+	meshDual.NumCell1Ds = m;
 	
 	return true;
 }
