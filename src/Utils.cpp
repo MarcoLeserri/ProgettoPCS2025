@@ -237,6 +237,31 @@ int VerificaEInserisci(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& 
     }
 }
 
+array<unsigned int, 3> VerificaEInserisci2(array<unsigned int, 3> NewFace, map<Vector2i, int, Vector2iComparator>& mappa, Polygonal& mesh, array<unsigned int, 3> Face) {
+    Vector2i Lato;
+    for( int i = 0; i < 3; i++){
+	    Lato.push_back(NewFace[i%3]);
+	    Lato.push_back(NewFace[(i + 1)%3]);
+	    
+	    auto it = mappa.find(Lato);
+		if (it != mappa.end()) {
+			Face.push_back(mappa[Lato]);
+			return it->second;
+		} else {
+			int id = mappa.size();
+			mappa[Lato] = id;
+			mesh.Cell1DsExtrema(0, id) = Lato[0];
+			mesh.Cell1DsExtrema(1, id) = Lato[1];
+			mesh.Cell1DsID.push_back(id);
+			Face.push_back(mappa[Lato]);
+			return Face;
+    		}
+	    
+    }
+
+}
+
+
 
 bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 	
@@ -269,12 +294,13 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 	
 	
 	map<Vector3d, int, Vector3dComparator> ControlloPunti;
+	map<Vector2i, int, Vector2iComparator> ControlloEdges;
 	Vector3d CoordA; //coordinate A
 	Vector3d CoordB; //coordinate B
 	Vector3d CoordC; //coordinate C
 	Vector3d CoordP; //coordinate nuovo punto
 	array<unsigned int, 3> NewFace;
-	//map< Vector3d, int> ControlloPunti;
+	array<unsigned int, 3> Face;
 		
 	for(int k = 0; k < numFaces; k++){
 		
@@ -286,63 +312,55 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 		CoordA[0] = mesh.Cell0DsCoordinates(0,id);
 		CoordA[1] = mesh.Cell0DsCoordinates(1,id);
 		CoordA[2] = mesh.Cell0DsCoordinates(2,id);
-		cout << CoordA[0] << " " << CoordA[1] << " " << CoordA[2] << endl;
 		
 		id = mesh.Cell2DsVertices[numfaccia][1];
 		cout << id << endl;
 		CoordB[0] = mesh.Cell0DsCoordinates(0,id);
 		CoordB[1] = mesh.Cell0DsCoordinates(1,id);
 		CoordB[2] = mesh.Cell0DsCoordinates(2,id);
-		cout << CoordB[0] << " " << CoordB[1] << " " << CoordB[2] << endl;
 		
 		id = mesh.Cell2DsVertices[numfaccia][2];
 		cout << id << endl;
 		CoordC[0] = mesh.Cell0DsCoordinates(0,id);
 		CoordC[1] = mesh.Cell0DsCoordinates(1,id);
 		CoordC[2] = mesh.Cell0DsCoordinates(2,id);
-		cout << CoordC[0] << " " << CoordC[1] << " " << CoordC[2] << endl;
 		
 		for(int i = 0; i < n; i++){ //conteggio piani
-			cout << "Triangoli dritti" << endl;
 			for(int j = 0; j < (n - i); j++){
 				CoordP = ((double(i)/n) * CoordA) + ((double(n - (i + j))/n) * CoordB) + ((double(j)/n) * CoordC);
-				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
 				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
 				NewFace[0] = id;
 				
 				CoordP = ((double(i)/n) * CoordA) + ((double(n - (i + j + 1))/n) * CoordB) + ((double(j + 1)/n) * CoordC);
-				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
 				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
 				NewFace[1] = id;
 				
 				CoordP = ((double(i + 1)/n) * CoordA) + ((double(n - (i + j + 1))/n) * CoordB) + ((double(j)/n) * CoordC);
-				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
 				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
 				NewFace[2] = id;
 
 				meshTriang.Cell2DsVertices.push_back(NewFace);
+				Face = VerificaEInserisci2(NewFace, ControlloEdges, meshTriang);
+				meshTriang.Cell2DsEdges.push_back(Face);
 			}
 			
-			cout << "Triangoli inversi" << endl;
 			for(int j = 0; j < (n - (i + 1)); j++){
 				CoordP = ((double(i)/n) * CoordA) + ((double(n - (i + j + 1))/n) * CoordB) + ((double(j + 1)/n) * CoordC);
-				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
 				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
 				NewFace[0] = id;
 				
 				CoordP = ((double(i + 1)/n) * CoordA) + ((double(n - (i + j + 2))/n) * CoordB) + ((double(j + 1)/n) * CoordC);
-				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
 				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
 				NewFace[1] = id;
 				
 				CoordP = ((double(i + 1)/n) * CoordA) + ((double(n - (i + j + 1))/n) * CoordB) + ((double(j)/n) * CoordC);
-				cout << fixed << setprecision(16) << CoordP[0] << " " << CoordP[1] << " " << CoordP[2] << endl;
 				id = VerificaEInserisci(CoordP, ControlloPunti, meshTriang);
 				NewFace[2] = id;
 				
 				meshTriang.Cell2DsVertices.push_back(NewFace);
+				Face = VerificaEInserisci2(NewFace, ControlloEdges, meshTriang);
+				meshTriang.Cell2DsEdges.push_back(Face);
 			}
-			
 		}
 	}
 		

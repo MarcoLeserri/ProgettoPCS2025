@@ -42,28 +42,7 @@ int main(int argc, char *argv[])
 			}
 			
 			//triangolazione poligono
-			/*TriangTotC_1(b, c, Polygon, PolygTriang);
-    		    		
-			for (int j = 0; j < PolygTriang.Cell0DsCoordinates.cols(); ++j) {
-				for (int i = 0; i < PolygTriang.Cell0DsCoordinates.rows(); ++i) {
-					cout << fixed << setprecision(16) << PolygTriang.Cell0DsCoordinates(i, j) << " ";
-				}
-				cout << endl;
-			}*/
-
-			for (int j = 0; j < Polygon.Cell0DsCoordinates.cols(); ++j) {
-				for (int i = 0; i < Polygon.Cell0DsCoordinates.rows(); ++i) {
-					cout << fixed << setprecision(16) << Polygon.Cell0DsCoordinates(i, j) << " ";
-				}
-				cout << endl;
-			}
-
-
-    		
-    		for (size_t i = 0; i < PolygTriang.Cell0DsID.size(); ++i) {
-    			cout << PolygTriang.Cell0DsID[i] << " ";
-			}
-			cout << endl;
+			TriangTotC_1(b, c, Polygon, PolygTriang);
 		
 		
 		
