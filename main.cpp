@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	if (abs(p-3) < err and  q >= 3)
 	{
 		if ((abs(b) < err and  c >= 1) or (abs(c) < err and  b >= 1)) // Class I
-		{	
+		{
 			//importa i dati
 			if(!ImportMesh(Polygon, q)){
 				cerr << "Error: file not found" << endl;
@@ -44,6 +44,10 @@ int main(int argc, char *argv[])
 			
 			//triangolazione poligono
 			TriangTotC_1(b, c, Polygon, PolygTriang);
+			
+			if(abs(q-3) < err){
+				//funzione duale
+			}
 			
 		}
 		else if(abs(b-c) < err) {
