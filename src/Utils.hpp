@@ -39,5 +39,7 @@ int VerificaEInserisci(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& 
 array<unsigned int, 3> VerificaEInserisci2(array<unsigned int, 3> NewFace, map<Vector2i, int, Vector2iComparator>& mappa, Polygonal& mesh, array<unsigned int, 3>& Face);
 bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang);
 
-vector<array<unsigned int, 3>> SearchFaces( int id, vector<array<unsigned int, 3>> VerticesF);
+vector<array<unsigned int, 3>> SearchFaces( int id, vector<array<unsigned int, 3>> VerticesF, int length);
 bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual);
+
+vector<array<unsigned int, 3>> SortFaces(int id, int IdOrd, vector<array<unsigned int,3>> FacesAd);

@@ -369,11 +369,11 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 	}
 }
 
-vector<array<unsigned int, 3>> SearchFaces(int id, vector<array<unsigned int, 3>> VerticesF) {
+vector<array<unsigned int, 3>> SearchFaces(int id, vector<array<unsigned int, 3>> VerticesF, int length) {
 	
 	vector<array<unsigned int, 3>> FacceAdiacenti; 
 	double err = 1e-16;
-	for( int i = 0; i < VerticesF.size(); i++) {
+	for( int i = 0; i < length; i++) {
 		
 		array<unsigned int, 3> Face = VerticesF[i];
 		int V0 = Face[0];
@@ -386,6 +386,45 @@ vector<array<unsigned int, 3>> SearchFaces(int id, vector<array<unsigned int, 3>
 	return FacceAdiacenti;
 }
 
+
+vector<array<unsigned int, 3>> SortFaces(int id, int IdOrd, vector<array<unsigned int,3>> FacesAd){
+	
+	double err =1e-16;
+	vector<array<unsigned int,3>> SortedFaces;
+	int n = FacesAd.size();
+	
+	for( int i = 0; i < n; i++){
+		
+		vector<array<unsigned int,3>> VFacciaAd = SearchFaces( IdOrd, FacesAd ,n);
+		array<unsigned int, 3> FacciaAd = VFacciaAd[0];
+		SortedFaces.push_back(FacciaAd);
+		FacesAd.erase(
+			remove(FacesAd.begin(), FacesAd.end(), FacciaAd),
+			FacesAd.end()
+		);	
+		
+		
+		int V0 = FacciaAd[0];
+		int V1 = FacciaAd[1];
+		int V2 = FacciaAd[2];
+		
+		if(id != V0 && IdOrd != V0){
+			IdOrd = V0;
+		}
+		else if(id != V1 && IdOrd != V1){
+			IdOrd = V1;
+		}else{
+			IdOrd = V2;
+		}
+		
+		
+	}
+	return SortedFaces;
+	
+	
+}
+
+
 	
 bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 	
@@ -395,7 +434,8 @@ bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 	
 	for( int i = 0; i < meshTriang.NumCell0Ds; i++){
 		int id = i;
-		vector<array<unsigned int, 3>> FacesAd = SearchFaces(id, VerticesF);
+		int length = VerticesF.size();
+		vector<array<unsigned int, 3>> FacesAd = SearchFaces(id, VerticesF, length);
 		
 		cout << "Le facce che contengono il punto " << id << " sono: " << endl;
 		for (int j = 0; j < FacesAd.size(); j ++) {
@@ -407,10 +447,30 @@ bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 		}
 		cout <<endl;
 		
+		vector<array<unsigned int, 3>> SortedFaces;
+		int IdOrd = FacesAd[1][1];
+		if (id != IdOrd) {
+			SortedFaces = SortFaces(id, IdOrd, FacesAd);
+			
+		}else{
+			IdOrd = FacesAd[1][2];
+			SortedFaces = SortFaces(id, IdOrd, FacesAd);
+		}
+		
+		cout << "Le facce ordinate che contengono il punto " << id << " sono: " << endl;
+		for (int j = 0; j < SortedFaces.size(); j ++) {
+			cout << "Vertici faccia " << j << ": ";
+			for (int k = 0; k < 3; k++) {
+				cout << SortedFaces[j][k] << " " ;
+			}
+			cout << endl;
+		}
+		cout <<endl;
 		
 		
 	}
-		
+	// abbiamo le facce ordinate per ogni vertice del poligono, 
+	//per ogni vertice, per ogni faccia adiacente calcola il baricentro e poi collegali in ordine e salva la faccia che sostituisce quel vertice
 	
 	return true;
 }
