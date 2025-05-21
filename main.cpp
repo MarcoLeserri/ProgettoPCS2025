@@ -26,7 +26,6 @@ int main(int argc, char *argv[])
 	int q = stoi(argv[2]);
 	int b = stoi(argv[3]);
 	int c = stoi(argv[4]);
-	cout << "q è : " << q << endl; 
 		
 	if (abs(p-3) < err and  q >= 3)
 	{
@@ -43,8 +42,14 @@ int main(int argc, char *argv[])
 			
 			//triangolazione poligono
 			TriangTotC_1(b, c, Polygon, PolygTriang);
-		
-		
+			
+			for( int i = 0; i < PolygTriang.Cell2DsEdges.size(); i++){
+				cout << "Id lati faccia " << i+1 << ": ";
+				for( int j = 0; j < 3; j++){
+					cout << PolygTriang.Cell2DsEdges[i][j] <<  " ";
+				}
+				cout << endl;
+			}
 		
 		
 		
