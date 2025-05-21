@@ -245,10 +245,8 @@ array<unsigned int, 3> VerificaEInserisci2(array<unsigned int, 3> NewFace, map<V
 	    auto it = mappa.find(Lato);
 		if (it != mappa.end()) {
 			Face[i] = mappa[Lato];
-			std::cout << "Già presente: " << Lato.transpose() << " → id " << it->second << std::endl;
 		} else {
 			int id = mappa.size();
-			std::cout << "Inserisco lato " << id << ": " << Lato.transpose() << std::endl;
 			mappa[Lato] = id;
 			mesh.Cell1DsExtrema(0, id) = Lato[0];
 			mesh.Cell1DsExtrema(1, id) = Lato[1];
@@ -369,6 +367,53 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 			}
 		}
 	}
+}
+
+vector<array<unsigned int, 3>> SearchFaces(int id, vector<array<unsigned int, 3>> VerticesF) {
+	
+	vector<array<unsigned int, 3>> FacceAdiacenti; 
+	double err = 1e-16;
+	for( int i = 0; i < VerticesF.size(); i++) {
 		
+		array<unsigned int, 3> Face = VerticesF[i];
+		int V0 = Face[0];
+		int V1 = Face[1];
+		int V2 = Face[2];
+		if (abs(id-V0) < err || abs(id-V1) < err || abs(id-V2) < err) {
+			FacceAdiacenti.push_back(Face);
+		}
+	}
+	return FacceAdiacenti;
+}
+
+	
+bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
+	
+	map<Vector3d, int, Vector3dComparator> ControlloPunti;
+	map<Vector2i, int, Vector2iComparator> ControlloEdges;
+	vector<array<unsigned int, 3>> VerticesF = meshTriang.Cell2DsVertices;
+	
+	for( int i = 0; i < meshTriang.NumCell0Ds; i++){
+		int id = i;
+		vector<array<unsigned int, 3>> FacesAd = SearchFaces(id, VerticesF);
+		
+		cout << "Le facce che contengono il punto " << id << " sono: " << endl;
+		for (int j = 0; j < FacesAd.size(); j ++) {
+			cout << "Vertici faccia " << j << ": ";
+			for (int k = 0; k < 3; k++) {
+				cout << FacesAd[j][k] << " " ;
+			}
+			cout << endl;
+		}
+		cout <<endl;
+		
+		
+		
+	}
+		
+	
 	return true;
 }
+	
+	
+	

@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
 {	
 	Polygonal Polygon;
 	Polygonal PolygTriang;
+	PolygonalDual PolygDual;
 	
 	double err = 1.0e-16;
 	if (argc < 5)
@@ -44,6 +45,10 @@ int main(int argc, char *argv[])
 			
 			//triangolazione poligono
 			TriangTotC_1(b, c, Polygon, PolygTriang);
+			
+			if(abs(q-3) < err) {
+				DualTot(PolygTriang, PolygDual);
+			}
 			
 		}
 		else if(abs(b-c) < err) {
