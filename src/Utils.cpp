@@ -234,6 +234,22 @@ int VerificaEInserisci(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& 
     }
 }
 
+int VerificaEInserisci(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& mappa, PolygonalDual& mesh) {
+    Coord = Coord / Coord.norm(); // normalizzazione
+    auto it = mappa.find(Coord);
+    if (it != mappa.end()) {
+        return it->second;
+    } else {
+        int id = mappa.size();
+        mappa[Coord] = id;
+        mesh.Cell0DsCoordinates(0, id) = Coord[0];
+        mesh.Cell0DsCoordinates(1, id) = Coord[1];
+        mesh.Cell0DsCoordinates(2, id) = Coord[2];
+        mesh.Cell0DsID.push_back(id);
+        return id;
+    }
+}
+
 array<unsigned int, 3> VerificaEInserisci2(array<unsigned int, 3> NewFace, map<Vector2i, int, Vector2iComparator>& mappa, Polygonal& mesh, array<unsigned int, 3>& Face) {
     Vector2i Lato;
     for( int i = 0; i < 3; i++){
@@ -258,7 +274,29 @@ array<unsigned int, 3> VerificaEInserisci2(array<unsigned int, 3> NewFace, map<V
 	return Face;
 }
 
+vector<unsigned int> VerificaEInserisci2Dual(vector<unsigned int> NewFace, map<Vector2i, int, Vector2iComparator>& mappa, PolygonalDual& mesh, vector<unsigned int>& Face) {
+    Vector2i Lato;
+    for( int i = 0; i < NewFace.size(); i++){
+	    int a = NewFace[i % 3];
+		int b = NewFace[(i + 1) % 3];
+		Lato << std::min(a, b), std::max(a, b);
 
+	    
+	    auto it = mappa.find(Lato);
+		if (it != mappa.end()) {
+			Face.insert(Face.begin() + i, mappa[Lato]);
+		} else {
+			int id = mappa.size();
+			mappa[Lato] = id;
+			mesh.Cell1DsExtrema(0, id) = Lato[0];
+			mesh.Cell1DsExtrema(1, id) = Lato[1];
+			mesh.Cell1DsID.push_back(id);
+			Face.insert(Face.begin() + i, mappa[Lato]);
+    		}
+	    
+    }
+	return Face;
+}
 
 bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 	
@@ -430,7 +468,42 @@ bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 	
 	map<Vector3d, int, Vector3dComparator> ControlloPunti;
 	map<Vector2i, int, Vector2iComparator> ControlloEdges;
+	
+	Vector3d CoordA; //coordinate A
+	Vector3d CoordB; //coordinate B
+	Vector3d CoordC; //coordinate C
+	Vector3d CoordP; //coordinate nuovo punto
+	vector<unsigned int> NewFace;
+	vector<unsigned int> Face;
+		
 	vector<array<unsigned int, 3>> VerticesF = meshTriang.Cell2DsVertices;
+	
+	//DOBBIAMO RISERVARE LO SPAZIO
+	int numFaces = meshTriang.Cell2DsVertices.size();
+	int NumPunti = 0;
+	int NumLati = 0;
+	NumLati += mesh.NumCell1Ds * n;
+	for( int i = 1; i < n; i++){
+		NumLati += i * 3 * numFaces;
+	}
+	
+	for( int i = 1; i < n - 1; i ++){
+		NumPunti += i * numFaces;
+	}
+	NumPunti += mesh.Cell0DsID.size();
+	NumPunti += mesh.Cell1DsID.size() * (n - 1);
+	meshTriang.NumCell0Ds = NumPunti;
+	meshTriang.NumCell1Ds = NumLati;
+	meshTriang.NumCell2Ds = n * n * numFaces;
+	
+	meshTriang.Cell0DsID.reserve(meshTriang.NumCell0Ds);
+    meshTriang.Cell0DsCoordinates = Eigen::MatrixXd::Zero(3, meshTriang.NumCell0Ds);
+    meshTriang.Cell1DsID.reserve(meshTriang.NumCell1Ds);
+    meshTriang.Cell1DsExtrema = Eigen::MatrixXi(2, meshTriang.NumCell1Ds);
+    meshTriang.Cell2DsID.reserve(meshTriang.NumCell2Ds);
+    meshTriang.Cell2DsVertices.reserve(meshTriang.NumCell2Ds);
+    meshTriang.Cell2DsEdges.reserve(meshTriang.NumCell2Ds);
+    //quello sopra è quello vecchio, dobbiamo contare tutti i lati, i punti e le facce
 	
 	for( int i = 0; i < meshTriang.NumCell0Ds; i++){
 		int id = i;
@@ -467,10 +540,34 @@ bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 		}
 		cout <<endl;
 		
+		for( int i = 0; i < SortedFaces.size(); i++){
+			
+			int idPunto;
+			idPunto = SortedFaces[i][0];
+			CoordA[0] = meshTriang.Cell0DsCoordinates(0,idPunto);
+			CoordA[1] = meshTriang.Cell0DsCoordinates(1,idPunto);
+			CoordA[2] = meshTriang.Cell0DsCoordinates(2,idPunto);
+			
+			idPunto = SortedFaces[i][1];
+			CoordB[0] = meshTriang.Cell0DsCoordinates(0,idPunto);
+			CoordB[1] = meshTriang.Cell0DsCoordinates(1,idPunto);
+			CoordB[2] = meshTriang.Cell0DsCoordinates(2,idPunto);
+			
+			idPunto = SortedFaces[i][2];
+			CoordC[0] = meshTriang.Cell0DsCoordinates(0,idPunto);
+			CoordC[1] = meshTriang.Cell0DsCoordinates(1,idPunto);
+			CoordC[2] = meshTriang.Cell0DsCoordinates(2,idPunto);
+			
+			CoordP = (CoordA + CoordB + CoordC) / 3;
+			idPunto = VerificaEInserisci(CoordP, ControlloPunti, meshDual);
+			NewFace.push_back(idPunto);
+		}
+		
+		meshDual.Cell2DsVertices.push_back(NewFace);
+		Face = VerificaEInserisci2Dual(NewFace, ControlloEdges, meshDual, Face);
+		meshDual.Cell2DsEdges.push_back(Face);
 		
 	}
-	// abbiamo le facce ordinate per ogni vertice del poligono, 
-	//per ogni vertice, per ogni faccia adiacente calcola il baricentro e poi collegali in ordine e salva la faccia che sostituisce quel vertice
 	
 	return true;
 }

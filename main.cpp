@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 		cerr << "Error: values out of range" << endl;
 	}
 	
-	Gedim::UCDUtilities utilities;
+	/*Gedim::UCDUtilities utilities;
     {
         utilities.ExportPoints("./Cell0Ds.inp",
                                PolygTriang.Cell0DsCoordinates
@@ -74,8 +74,21 @@ int main(int argc, char *argv[])
                                  PolygTriang.Cell0DsCoordinates,
                                  PolygTriang.Cell1DsExtrema
                                  );
-    }
+    }*/
 	
+	Gedim::UCDUtilities utilities;
+    {
+        utilities.ExportPoints("./Cell0Ds.inp",
+                               PolygDual.Cell0DsCoordinates
+                               );
+    }
+
+    {
+        utilities.ExportSegments("./Cell1Ds.inp",
+                                 PolygDual.Cell0DsCoordinates,
+                                 PolygDual.Cell1DsExtrema
+                                 );
+    }
 	
 	return 0;
 }
