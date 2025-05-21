@@ -45,19 +45,6 @@ int main(int argc, char *argv[])
 			//triangolazione poligono
 			TriangTotC_1(b, c, Polygon, PolygTriang);
 			
-			for( int i = 0; i < PolygTriang.Cell2DsEdges.size(); i++){
-				cout << "Id lati faccia " << i+1 << ": ";
-				for( int j = 0; j < 3; j++){
-					cout << PolygTriang.Cell2DsEdges[i][j] <<  " ";
-				}
-				cout << endl;
-			}
-		
-		
-		
-		
-		
-		
 		}
 		else if(abs(b-c) < err) {
 		// polyhedrons of II Class 
