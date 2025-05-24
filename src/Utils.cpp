@@ -6,10 +6,17 @@
 #include <map>
 #include <vector>
 #include <iomanip>
+#include <cmath>
+#include <queue>
+#include <functional>
+#include <utility>
 
 using namespace std;
 using namespace Eigen;
 using namespace PolygonalLibrary;
+
+using coppia = pair<int, double>;
+using grafo =  vector<vector<coppia>>;
 
 namespace PolygonalLibrary{
 
@@ -218,6 +225,7 @@ bool ImportCell2Ds(Polygonal& mesh, int q)
 
 }
 
+//INIZIO PARTE TRIANGOLAZIONE
 int VerificaEInserisci(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& mappa, Polygonal& mesh) {
     Coord = Coord / Coord.norm(); // normalizzazione
     auto it = mappa.find(Coord);
@@ -406,8 +414,10 @@ bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang){
 			}
 		}
 	}
+	return true;
 }
 
+//INIZIO PARTE DUALE
 vector<array<unsigned int, 3>> SearchFaces(int id, vector<array<unsigned int, 3>> VerticesF, int length) {
 	
 	vector<array<unsigned int, 3>> FacceAdiacenti; 
@@ -425,10 +435,8 @@ vector<array<unsigned int, 3>> SearchFaces(int id, vector<array<unsigned int, 3>
 	return FacceAdiacenti;
 }
 
-
 vector<array<unsigned int, 3>> SortFaces(int id, int IdOrd, vector<array<unsigned int,3>> FacesAd){
 	
-	double err =1e-16;
 	vector<array<unsigned int,3>> SortedFaces;
 	int n = FacesAd.size();
 	
@@ -462,8 +470,6 @@ vector<array<unsigned int, 3>> SortFaces(int id, int IdOrd, vector<array<unsigne
 	
 	
 }
-
-
 	
 bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 	
@@ -495,7 +501,7 @@ bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 		meshDual.Cell2DsID.push_back(i);
 	}
 	
-	for( int i = 0; i < meshTriang.NumCell0Ds; i++){
+	for( size_t i = 0; i < meshTriang.NumCell0Ds; i++){
 		NewFace.clear();
 		Face.clear();
 		int id = i;
@@ -512,7 +518,7 @@ bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 			SortedFaces = SortFaces(id, IdOrd, FacesAd);
 		}
 		
-		for( int i = 0; i < SortedFaces.size(); i++){
+		for( size_t i = 0; i < SortedFaces.size(); i++){
 			
 			int idPunto;
 			idPunto = SortedFaces[i][0];
@@ -546,6 +552,188 @@ bool DualTot(Polygonal& meshTriang, PolygonalDual& meshDual) {
 	
 	return true;
 }
+
+
+//INIZIO PARTE CAMMINO MINIMO
+vector<Vector2i> SearchEdges(int id1, vector<Vector2i> Lati){
 	
+	vector<Vector2i> LatiAd;
+	int NumLati = Lati.size(); 
+	double err = 1e-16;
+	for( int i = 0; i < NumLati; i++) {
+		
+		Vector2i Edge = Lati[i];
+		int V0 = Edge[0];
+		int V1 = Edge[1];
+		if (abs(id1-V0) < err || abs(id1-V1) < err) {
+			LatiAd.push_back(Edge);
+		}
+	}
+	return LatiAd;
+}
+
+vector<coppia> SearchPoint(int id1, vector<Vector2i> EdgesList, map<Vector2i, double, Vector2iComparator> EdgesLength){
 	
+	coppia tupla;
+	vector<coppia> PuntiAdiacenti;
+	vector<Vector2i> LatiAdiacenti = SearchEdges( id1, EdgesList);
 	
+	for( size_t i = 0; i < LatiAdiacenti.size(); i++){
+		if( LatiAdiacenti[i][0] != id1){
+			int idAd = LatiAdiacenti[i][0];
+			tupla.first = idAd;
+			tupla.second = EdgesLength[LatiAdiacenti[i]];
+		}else{
+			int idAd = LatiAdiacenti[i][1];
+			tupla.first = idAd;
+			tupla.second = EdgesLength[LatiAdiacenti[i]];
+		}
+		PuntiAdiacenti.push_back(tupla);
+	}
+	return PuntiAdiacenti;
+} 
+	
+grafo BuildGraph(PolygonalDual& mesh, vector<Vector2i> EdgesList, map<Vector2i, double, Vector2iComparator> EdgesLength){
+	
+	int numPunti = mesh.NumCell0Ds;
+	vector<unsigned int> PointList = mesh.Cell0DsID;
+	grafo Grafo;
+	
+	for( int i = 0; i < numPunti; i++){
+		vector<coppia> PuntiAdiacenti = SearchPoint(i, EdgesList, EdgesLength);
+		Grafo.push_back(PuntiAdiacenti);
+	}
+	return Grafo;
+	
+} 
+
+vector<unsigned int> ShortestPath(int id1, int id2, PolygonalDual& meshDual){
+	
+	vector<Vector2i> EdgesList;
+	Vector2i Edge;
+	//creo il vettore di Vector2i con tutti i lati del poligono
+	for( size_t i = 0; i < meshDual.NumCell1Ds; i++){
+		Edge[0] = meshDual.Cell1DsExtrema(0, i);
+		Edge[1] = meshDual.Cell1DsExtrema(1, i);
+		EdgesList.push_back(Edge);
+	}
+	
+	//creo una mappa che associa ad ogni segmento la sua lunghezza
+	map<Vector2i, double, Vector2iComparator> EdgesLength;
+	Vector3d Origin;
+	Vector3d End;
+	double length;
+	
+	int NumEdg = meshDual.NumCell1Ds;
+	
+	for( int i = 0; i < NumEdg; i++){ //itero su tutti i lati
+		Edge[0] = meshDual.Cell1DsExtrema(0, i);
+		Edge[1] = meshDual.Cell1DsExtrema(1, i);
+		
+		//registro le coordinate dei due estremi del segmento
+		Origin[0] = meshDual.Cell0DsCoordinates(0, Edge[0]);
+		Origin[1] = meshDual.Cell0DsCoordinates(1, Edge[0]);
+		Origin[2] = meshDual.Cell0DsCoordinates(2, Edge[0]);
+		
+		End[0] = meshDual.Cell0DsCoordinates(0, Edge[1]);
+		End[1] = meshDual.Cell0DsCoordinates(1, Edge[1]);
+		End[2] = meshDual.Cell0DsCoordinates(2, Edge[1]);
+		
+		length = (End - Origin).norm(); //calcolo la lunghezza del segmento
+		EdgesLength[Edge] = length; //registro il segmento con la sua lunghezza associata
+	}
+	
+	//inizio algoritmo di Dijkstra
+	
+	//costurisco il grafo
+	grafo Grafo = BuildGraph( meshDual, EdgesList, EdgesLength);
+	vector<double> dist(meshDual.NumCell0Ds, 10000); //vettore delle distanze
+	vector<int> pred(meshDual.NumCell0Ds, -1);
+	
+	priority_queue<coppia, vector<coppia>, greater<coppia>> pq;
+	pq.push({0, id1});
+	dist[id1] = 0;
+	
+	while(!pq.empty()){
+		int u = pq.top().second;
+		pq.pop();
+		
+		for(const auto& edge: Grafo[u]){
+			int v = edge.first;
+			double w = edge.second;
+			
+			if(dist[v] > dist[u] + w){
+				dist[v] = dist[u] + w;
+				pred[v] = u;
+				pq.push({dist[v], v});
+			}
+		}
+	}
+	
+	cout << "Il cammino più breve da " << id1 << " a " << id2 << " è: " << dist[id2] << endl;
+	
+	vector<unsigned int> percorso;
+	for (int at = id2; at != -1; at = pred[at]) {
+    	percorso.push_back(at);
+	}
+	reverse(percorso.begin(), percorso.end());
+	
+	cout << "Il percorso è formato dai punti:" << endl;
+	for( size_t i = 0; i < percorso.size(); i++){
+		cout << percorso[i] << " " ;
+	}
+	cout << endl;
+	return percorso;
+
+}
+
+vector<double> ParaviewPoints(vector<unsigned int> percorso, PolygonalDual& mesh){
+	
+	int NumVert = mesh.NumCell0Ds;
+	vector<double> vettoreParaview(NumVert, 0.0);
+	
+	for(size_t i = 0; i < percorso.size(); i++){
+		int id = percorso[i];
+		vettoreParaview[id] = 1.0;
+	}
+	return vettoreParaview;
+}
+	
+vector<double> ParaviewEdges(vector<unsigned int> percorso, PolygonalDual& mesh){
+	
+	int NumEdges = mesh.NumCell1Ds;
+	vector<double> vettoreEdges(NumEdges, 0.0);
+	
+	vector<Vector2i> EdgesList;
+	Vector2i Edge;
+	//creo il vettore di Vector2i con tutti i lati del poligono
+	for( size_t i = 0; i < mesh.NumCell1Ds; i++){
+		int a = mesh.Cell1DsExtrema(0, i);
+		int b = mesh.Cell1DsExtrema(1, i);
+		Edge << std::min(a, b), std::max(a, b);
+		EdgesList.push_back(Edge);
+	}
+	
+	//creo il vettore di Vector2i con tutti i lati del percorso
+	vector<Vector2i> EdgesPerc;
+	int n = percorso.size();
+	for( int i = 0; i < n; i++){
+		int a = percorso[i];
+		int b = percorso[i + 1];
+		Edge << std::min(a, b), std::max(a, b);
+		EdgesPerc.push_back(Edge);
+	}
+	
+	for( size_t i = 0; i < mesh.NumCell1Ds; i++){
+		for( size_t j = 0; j < EdgesPerc.size(); j++){
+			if(EdgesList[i] != EdgesPerc[j]){
+				vettoreEdges[i] = 0.0;
+			}else{
+				vettoreEdges[i] = 1.0;
+				break;
+			}
+		}
+	}
+	return vettoreEdges;
+}
+

@@ -50,6 +50,46 @@ int main(int argc, char *argv[])
 				DualTot(PolygTriang, PolygDual);
 			}
 			
+			if(abs(argc - 7) < err){
+				int id1 = stoi(argv[5]);
+				int id2 = stoi(argv[6]);
+				vector<unsigned int> percorso = ShortestPath(id1, id2, PolygDual);
+				vector<double> ParaViewPunti = ParaviewPoints(percorso, PolygDual);
+				vector<double> ParaViewEdges = ParaviewEdges(percorso, PolygDual);
+				
+				Gedim::UCDUtilities utilities;
+	
+				vector<Gedim::UCDProperty<double>> propsVertices(1);
+				propsVertices[0].Label = "ShortPath";
+				propsVertices[0].UnitLabel = "-";
+				propsVertices[0].NumComponents = 1;
+				propsVertices[0].Data = ParaViewPunti.data();
+			
+			
+				vector<Gedim::UCDProperty<double>> propsEdges(1);
+				propsEdges[0].Label = "ShortPath";
+				propsEdges[0].UnitLabel = "-";
+				propsEdges[0].NumComponents = 1;
+				propsEdges[0].Data = ParaViewEdges.data();
+				
+				{
+					utilities.ExportPoints("./Cell0Ds.inp",
+										   PolygDual.Cell0DsCoordinates,
+										   propsVertices
+										   );
+				}
+			
+				{
+					utilities.ExportSegments("./Cell1Ds.inp",
+											 PolygDual.Cell0DsCoordinates,
+											 PolygDual.Cell1DsExtrema,
+											 propsVertices,  // richiesto anche per segmenti
+											 propsEdges
+											 );
+				}
+
+			}
+			
 		}
 		else if(abs(b-c) < err) {
 		// polyhedrons of II Class 
@@ -75,20 +115,6 @@ int main(int argc, char *argv[])
                                  PolygTriang.Cell1DsExtrema
                                  );
     }*/
-	
-	Gedim::UCDUtilities utilities;
-    {
-        utilities.ExportPoints("./Cell0Ds.inp",
-                               PolygDual.Cell0DsCoordinates
-                               );
-    }
-
-    {
-        utilities.ExportSegments("./Cell1Ds.inp",
-                                 PolygDual.Cell0DsCoordinates,
-                                 PolygDual.Cell1DsExtrema
-                                 );
-    }
 	
 	return 0;
 }
