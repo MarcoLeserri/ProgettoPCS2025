@@ -596,7 +596,6 @@ vector<coppia> SearchPoint(int id1, vector<Vector2i> EdgesList, map<Vector2i, do
 grafo BuildGraph(PolygonalDual& mesh, vector<Vector2i> EdgesList, map<Vector2i, double, Vector2iComparator> EdgesLength){
 	
 	int numPunti = mesh.NumCell0Ds;
-	vector<unsigned int> PointList = mesh.Cell0DsID;
 	grafo Grafo;
 	
 	for( int i = 0; i < numPunti; i++){
