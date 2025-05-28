@@ -47,6 +47,12 @@ list(APPEND Polygon_SOURCES ${src_paraview_sources})
 list(APPEND Polygon_HEADERS ${src_paraview_headers})
 list(APPEND Polygon_INCLUDE ${src_paraview_includes})
 
+add_subdirectory(src_test)
+
+list(APPEND Polygon_SOURCES ${src_test_sources})
+list(APPEND Polygon_HEADERS ${src_test_headers})
+list(APPEND Polygon_INCLUDE ${src_test_includes})
+
 # Create executable
 ################################################################################
 add_executable(${PROJECT_NAME}
@@ -57,3 +63,15 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} ${Polygon_LINKED_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${Polygon_INCLUDE})
 target_compile_options(${PROJECT_NAME} PUBLIC -fPIC)
+
+add_executable(${PROJECT_NAME}_TEST
+      main_test.cpp
+      ${Polygon_SOURCES}
+      ${Polygon_HEADERS}
+      ${src_test_sources}
+      ${src_test_headers})
+
+target_link_libraries(${PROJECT_NAME}_TEST ${Polygon_LINKED_LIBRARIES})
+target_include_directories(${PROJECT_NAME}_TEST PRIVATE ${Polygon_INCLUDE} 
+${src_test_includes})
+target_compile_options(${PROJECT_NAME}_TEST PUBLIC -fPIC)
