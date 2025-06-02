@@ -163,9 +163,10 @@ namespace TriangulationLibrary{
 	
 TEST(TestTriangulation, TestTriangulationC_1)
 {
-   int b = 2;
+   int b = 5;
    int c = 0;
    Polygonal mesh;
+   Polygonal meshTriang;
    mesh.NumCell0Ds = 4;
    mesh.NumCell1Ds = 6;
    mesh.NumCell2Ds = 4;
@@ -187,9 +188,17 @@ TEST(TestTriangulation, TestTriangulationC_1)
 						  
    mesh.Cell2DsVertices = {{0,1,2}, {1,2,3}, {0,2,3}, {0,1,3}};
    
-   mesh.Cell2DsEdges = {{0,2,1}, {3,5,4}, {1,5,2}, {0,4,2}};
-
-	
+   mesh.Cell2DsEdges = {{0,3,1}, {3,5,4}, {1,5,2}, {0,4,2}};
+   
+   int ExpectNumCell0Ds = 52;
+   int ExpectNumCell1Ds = 150;
+   int ExpectNumCell2Ds = 100;
+   
+   TriangTotC_1(b, c, mesh, meshTriang);
+   
+   EXPECT_EQ(meshTriang.NumCell0Ds, ExpectNumCell0Ds);
+   EXPECT_EQ(meshTriang.NumCell1Ds, ExpectNumCell1Ds);
+   EXPECT_EQ(meshTriang.NumCell2Ds, ExpectNumCell2Ds);
 	
 }
 	
