@@ -838,7 +838,7 @@ bool TriangTotC_2(int b,int c, Polygonal& mesh, Polygonal& meshTriang2){
 			CoordC[2] = meshT1.Cell0DsCoordinates(2,idPunto);
 			
 			CoordP = (CoordA + CoordB + CoordC) / 3;
-			Baricentri.push_back(CoordP);
+			Baricentri.push_back(CoordP/norm(CoordP));
 			}
 	
 	for(int i = 0; i < n; i++){ //conteggio piani
@@ -863,8 +863,7 @@ bool TriangTotC_2(int b,int c, Polygonal& mesh, Polygonal& meshTriang2){
 					CoordC[2] = meshT1.Cell0DsCoordinates(2,idC);
 					
 					CoordP = (CoordA + CoordB)/2;
-					
-					
+				}
 			}
 		}
 		
