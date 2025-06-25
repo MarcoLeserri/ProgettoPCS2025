@@ -736,3 +736,73 @@ vector<double> ParaviewEdges(vector<unsigned int> percorso, PolygonalDual& mesh)
 	return vettoreEdges;
 }
 
+
+void FileTxt(const Polygonal& mesh)
+{
+	ofstream printout0("Cell0Ds.txt");
+	printout0 << "Id;X;Y;Z" << endl;
+	
+	for(unsigned int i = 0; i < mesh.NumCell0Ds; i++){
+		unsigned int id = i;
+		double X = mesh.Cell0DsCoordinates(0,i);
+		double Y = mesh.Cell0DsCoordinates(1,i);
+		double Z = mesh.Cell0DsCoordinates(2,i);
+		printout0 << id << ";" ;
+		printout0 << scientific << setprecision(16) << X << ";" << Y << ";" << Z << endl;
+	}
+	
+	printout0.close();
+	
+	ofstream printout1("Cell1Ds.txt");
+	printout1 << "Id;Origin;End" << endl;
+	
+	for(unsigned int i = 0; i < mesh.NumCell1Ds; i++){
+		unsigned int id = i;
+		int Origin = mesh.Cell1DsExtrema(0,i);
+		int End = mesh.Cell1DsExtrema(1,i);
+		printout1 << id << ";" ;
+		printout1 << Origin << ";" << End << endl;
+	}
+	
+	printout1.close();
+	
+	ofstream printout2("Cell2Ds.txt");
+	printout2 << "Id;NumVertices;Vertices;NumEdges;Edges" << endl;
+	
+	for(unsigned int i = 0; i < mesh.NumCell2Ds; i++){
+		unsigned int id = i;
+		int NumVertices = size(mesh.Cell2DsVertices[i]);
+		int NumEdges = size(mesh.Cell2DsEdges[i]);
+		
+		printout2 << id << ";" << NumVertices;
+		for(int j = 0; j < NumVertices; j++){
+			printout2 << ";" << mesh.Cell2DsVertices[i][j];
+		}
+		
+		printout2 << ";" << NumEdges;
+		for(int j = 0; j < NumEdges; j++){
+			printout2 << ";" << mesh.Cell2DsEdges[i][j];
+		}
+		printout2 << endl;
+	}
+	
+	printout2.close();
+	
+	ofstream printout3("Cell3Ds.txt");
+	printout3 << "Id;NumVertices;NumEdges;NumFaces;IDVertices;IDEdges;IDFaces" << endl;
+	printout3 << 0 << ";" << mesh.NumCell0Ds << ";" << mesh.NumCell1Ds << ";" << mesh.NumCell2Ds;
+	
+	for(unsigned int i = 0; i < mesh.NumCell0Ds; i++){
+		printout3 << ";" << mesh.Cell0DsID[i];
+	}
+	
+	for(unsigned int i = 0; i < mesh.NumCell1Ds; i++){
+		printout3 << ";" << mesh.Cell1DsID[i];
+	}
+	
+	for(unsigned int i = 0; i < mesh.NumCell2Ds; i++){
+		printout3 << ";" << mesh.Cell2DsID[i];
+	}
+	
+	printout3.close();
+}

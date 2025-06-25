@@ -65,3 +65,5 @@ vector<unsigned int> ShortestPath(int id1, int id2, PolygonalDual& meshDual);
 vector<double> ParaviewPoints(vector<unsigned int> percorso, PolygonalDual& mesh);
 
 vector<double> ParaviewEdges(vector<unsigned int> percorso, PolygonalDual& mesh);
+
+void FileTxt(const Polygonal& mesh);

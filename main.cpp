@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 			
 			//triangolazione poligono
 			TriangTotC_1(b, c, Polygon, PolygTriang);
+			FileTxt(PolygTriang);
 			
 			if(abs(q-3) < err) {
 				DualTot(PolygTriang, PolygDual);
