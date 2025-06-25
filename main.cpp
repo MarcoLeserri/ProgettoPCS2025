@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 				vector<unsigned int> percorso = ShortestPath(id1, id2, PolygDual);
 				vector<double> ParaViewPunti = ParaviewPoints(percorso, PolygDual);
 				vector<double> ParaViewEdges = ParaviewEdges(percorso, PolygDual);
-				
+				/*
 				Gedim::UCDUtilities utilities;
 	
 				vector<Gedim::UCDProperty<double>> propsVertices(1);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 											 propsVertices,  // richiesto anche per segmenti
 											 propsEdges
 											 );
-				}
+				} */
 
 			}
 			
@@ -103,19 +103,19 @@ int main(int argc, char *argv[])
 		cerr << "Error: values out of range" << endl;
 	}
 	
-	/*Gedim::UCDUtilities utilities;
+	Gedim::UCDUtilities utilities;
     {
         utilities.ExportPoints("./Cell0Ds.inp",
-                               PolygTriang.Cell0DsCoordinates
+                               Polygon.Cell0DsCoordinates
                                );
     }
 
     {
         utilities.ExportSegments("./Cell1Ds.inp",
-                                 PolygTriang.Cell0DsCoordinates,
-                                 PolygTriang.Cell1DsExtrema
+                                 Polygon.Cell0DsCoordinates,
+                                 Polygon.Cell1DsExtrema
                                  );
-    }*/
+    }
 	
 	return 0;
 }

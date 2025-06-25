@@ -112,4 +112,94 @@ TEST(TestPath, TestShortestPath)
 }
 
 }
+namespace VerifyLibrary {
 
+TEST(TestVerify, TestVerify_Insert)
+{
+   PolygonalDual mesh;
+   Vector3d a = {1.0, 1.0, 1.0};
+   a = a/ a.norm();
+   Vector3d b = {1.0, -1.0, -1.0};
+   b = b/ b.norm();
+   Vector3d c = {1.0, 0.0, 0.0};
+   c = c/ c.norm();
+   
+   map<Vector3d, int, Vector3dComparator> mappa = {
+	    {a, 0},
+	    {b, 1},
+        {c, 2}};
+	
+   Vector3d Coord = {-1.0, 0.0, 1.0};
+   Vector3d Coord2 = {1.0, -1.0, -1.0};
+   mesh.NumCell0Ds = 10;
+   mesh.Cell0DsCoordinates = Eigen::MatrixXd::Zero(3, mesh.NumCell0Ds);
+   int id = 3;
+   int id2 = 1;
+   EXPECT_EQ(VerificaEInserisciDual(Coord, mappa, mesh), id);
+   EXPECT_EQ(VerificaEInserisciDual(Coord2, mappa, mesh), id2);
+}
+
+
+TEST(TestVerify2, TestVerify_Insert2)
+{
+   PolygonalDual mesh;
+   vector<unsigned int> NewFace = {4, 6, 5};
+   
+   map<Vector2i, int, Vector2iComparator> mappa = {
+	    {{4, 6}, 0},
+	    {{5, 6}, 1},
+        {{1, 2}, 2}};
+		
+   mesh.NumCell1Ds = 24;
+   mesh.Cell1DsExtrema = Eigen::MatrixXi::Zero(2, mesh.NumCell1Ds);
+   vector<unsigned int> Face;
+   vector<unsigned int> ExpectedFace = {0, 1, 3};
+   EXPECT_EQ(VerificaEInserisci2Dual(NewFace, mappa, mesh.Cell1DsExtrema, mesh, Face), ExpectedFace);
+}
+
+}
+
+namespace TriangulationLibrary{
+	
+TEST(TestTriangulation, TestTriangulationC_1)
+{
+   int b = 5;
+   int c = 0;
+   Polygonal mesh;
+   Polygonal meshTriang;
+   mesh.NumCell0Ds = 4;
+   mesh.NumCell1Ds = 6;
+   mesh.NumCell2Ds = 4;
+
+   mesh.Cell0DsID = {0,1,2,3};
+   mesh.Cell1DsID = {0,1,2,3,4,5};
+   mesh.Cell2DsID = {0,1,2,3};
+ 
+   mesh.Cell0DsCoordinates = Eigen::MatrixXd::Zero(3, mesh.NumCell0Ds);
+   mesh.Cell1DsExtrema = Eigen::MatrixXi::Zero(2, mesh.NumCell1Ds);
+   
+   
+   
+   mesh.Cell0DsCoordinates << 1.0, 1.0, -1.0, -1.0, 
+							1.0, -1.0, 1.0, -1.0,
+							1.0, -1.0, -1.0, 1.0;
+   mesh.Cell1DsExtrema << 0, 0, 0, 1, 1, 2,
+                          1, 2, 3, 2, 3, 3;
+						  
+   mesh.Cell2DsVertices = {{0,1,2}, {1,2,3}, {0,2,3}, {0,1,3}};
+   
+   mesh.Cell2DsEdges = {{0,3,1}, {3,5,4}, {1,5,2}, {0,4,2}};
+   
+   int ExpectNumCell0Ds = 52;
+   int ExpectNumCell1Ds = 150;
+   int ExpectNumCell2Ds = 100;
+   
+   TriangTotC_1(b, c, mesh, meshTriang);
+   
+   EXPECT_EQ(meshTriang.NumCell0Ds, ExpectNumCell0Ds);
+   EXPECT_EQ(meshTriang.NumCell1Ds, ExpectNumCell1Ds);
+   EXPECT_EQ(meshTriang.NumCell2Ds, ExpectNumCell2Ds);
+	
+}
+	
+} 
