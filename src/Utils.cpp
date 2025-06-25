@@ -806,3 +806,70 @@ void FileTxt(const Polygonal& mesh)
 	
 	printout3.close();
 }
+
+bool TriangTotC_2(int b,int c, Polygonal& mesh, Polygonal& meshTriang2){
+	Polygonal meshT1;
+	TriangTotC_1(b, c, mesh, meshT1) //creo la triangolazione di tipo 1
+	
+	//RISERVA GLI SPAZI!!!!!!!
+	//calcolo tutti i baricentri
+	
+	Vector3d CoordP;
+	Vector3d CoordA;
+	Vector3d CoordB;
+	Vector3d CoordC;
+	vector<Vector3d> Baricentri;
+	for( size_t i = 0; i < meshT1.NumCell2Ds.size(); i++){
+			
+			int idPunto;
+			idPunto = meshT1.Cell2DsVertices[i][0];
+			CoordA[0] = meshT1.Cell0DsCoordinates(0,idPunto);
+			CoordA[1] = meshT1.Cell0DsCoordinates(1,idPunto);
+			CoordA[2] = meshT1.Cell0DsCoordinates(2,idPunto);
+			
+			idPunto = meshT1.Cell2DsVertices[i][1];
+			CoordB[0] = meshT1.Cell0DsCoordinates(0,idPunto);
+			CoordB[1] = meshT1.Cell0DsCoordinates(1,idPunto);
+			CoordB[2] = meshT1.Cell0DsCoordinates(2,idPunto);
+			
+			idPunto = meshT1.Cell2DsVertices[i][2];
+			CoordC[0] = meshT1.Cell0DsCoordinates(0,idPunto);
+			CoordC[1] = meshT1.Cell0DsCoordinates(1,idPunto);
+			CoordC[2] = meshT1.Cell0DsCoordinates(2,idPunto);
+			
+			CoordP = (CoordA + CoordB + CoordC) / 3;
+			Baricentri.push_back(CoordP);
+			}
+	
+	for(int i = 0; i < n; i++){ //conteggio piani
+		
+		if(i == 0){
+			for(int j = 0; j < (n - i); j++){
+				if(j == 0){
+					int idA = meshT1.Cell2DsVertices[j][0];
+					int idB = meshT1.Cell2DsVertices[j][1];
+					int idC = meshT1.Cell2DsVertices[j][2];
+					
+					CoordA[0] = meshT1.Cell0DsCoordinates(0,idA);
+					CoordA[1] = meshT1.Cell0DsCoordinates(1,idA);
+					CoordA[2] = meshT1.Cell0DsCoordinates(2,idA);
+			
+					CoordB[0] = meshT1.Cell0DsCoordinates(0,idB);
+					CoordB[1] = meshT1.Cell0DsCoordinates(1,idB);
+					CoordB[2] = meshT1.Cell0DsCoordinates(2,idB);
+					
+					CoordC[0] = meshT1.Cell0DsCoordinates(0,idC);
+					CoordC[1] = meshT1.Cell0DsCoordinates(1,idC);
+					CoordC[2] = meshT1.Cell0DsCoordinates(2,idC);
+					
+					CoordP = (CoordA + CoordB)/2;
+					
+					
+			}
+		}
+		
+		for(int j = 0; j < (n - i); j++){
+		}
+	}
+	
+}
