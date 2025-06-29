@@ -38,13 +38,13 @@ struct Vector2iComparator {
 };
 
 
-int VerificaEInserisci(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& mappa, Polygonal& mesh);
+int VerifyAndInsert(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& mappa, Polygonal& mesh);
 
-int VerificaEInserisciDual(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& mappa, PolygonalDual& mesh);
+int VerifyAndInsertDual(Vector3d& Coord, map<Vector3d, int, Vector3dComparator>& mappa, PolygonalDual& mesh);
 
-array<unsigned int, 3> VerificaEInserisci2(array<unsigned int, 3> NewFace, map<Vector2i, int, Vector2iComparator>& mappa, Polygonal& mesh, array<unsigned int, 3>& Face);
+array<unsigned int, 3> VerifyAndInsert2(array<unsigned int, 3> NewFace, map<Vector2i, int, Vector2iComparator>& mappa, Polygonal& mesh, array<unsigned int, 3>& Face);
 
-vector<unsigned int> VerificaEInserisci2Dual(vector<unsigned int> NewFace, map<Vector2i, int, Vector2iComparator>& mappa, Eigen::MatrixXi& Cell1DsExtrema, PolygonalDual& mesh, vector<unsigned int>& Face);
+vector<unsigned int> VerifyAndInsert2Dual(vector<unsigned int> NewFace, map<Vector2i, int, Vector2iComparator>& mappa, Eigen::MatrixXi& Cell1DsExtrema, PolygonalDual& mesh, vector<unsigned int>& Face);
 
 bool TriangTotC_1(int b, int c, Polygonal& mesh, Polygonal& meshTriang);
 
