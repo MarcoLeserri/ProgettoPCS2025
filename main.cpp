@@ -45,10 +45,48 @@ int main(int argc, char *argv[])
 			
 			//triangolazione poligono
 			TriangTotC_1(b, c, Polygon, PolygTriang);
+<<<<<<< Updated upstream
 			FileTxt(PolygTriang);
+=======
+			if (abs(q-3) > err){
+				
+				Gedim::UCDUtilities utilities;
+    {
+        utilities.ExportPoints("./Cell0Ds.inp",
+                               PolygTriang.Cell0DsCoordinates
+                               );
+    }
+
+    {
+        utilities.ExportSegments("./Cell1Ds.inp",
+                                 PolygTriang.Cell0DsCoordinates,
+                                 PolygTriang.Cell1DsExtrema
+                                 );
+    }
+				
+			}
+>>>>>>> Stashed changes
 			
 			if(abs(q-3) < err) {
-				DualTot(PolygTriang, PolygDual);
+				DualTot(PolygTriang, PolygDual)
+				
+				if(abs(argc - 7) > err){
+					
+					Gedim::UCDUtilities utilities;
+    {
+        utilities.ExportPoints("./Cell0Ds.inp",
+                               PolygDual.Cell0DsCoordinates
+                               );
+    }
+
+    {
+        utilities.ExportSegments("./Cell1Ds.inp",
+                                 PolygonDual.Cell0DsCoordinates,
+                                 PolygonDual.Cell1DsExtrema
+                                 );
+    }
+					
+				}
 			}
 			
 			if(abs(argc - 7) < err){
@@ -57,7 +95,7 @@ int main(int argc, char *argv[])
 				vector<unsigned int> percorso = ShortestPath(id1, id2, PolygDual);
 				vector<double> ParaViewPunti = ParaviewPoints(percorso, PolygDual);
 				vector<double> ParaViewEdges = ParaviewEdges(percorso, PolygDual);
-				/*
+				
 				Gedim::UCDUtilities utilities;
 	
 				vector<Gedim::UCDProperty<double>> propsVertices(1);
@@ -87,7 +125,7 @@ int main(int argc, char *argv[])
 											 propsVertices,  // richiesto anche per segmenti
 											 propsEdges
 											 );
-				} */
+				}
 
 			}
 			
@@ -102,20 +140,6 @@ int main(int argc, char *argv[])
 	else {
 		cerr << "Error: values out of range" << endl;
 	}
-	
-	Gedim::UCDUtilities utilities;
-    {
-        utilities.ExportPoints("./Cell0Ds.inp",
-                               Polygon.Cell0DsCoordinates
-                               );
-    }
-
-    {
-        utilities.ExportSegments("./Cell1Ds.inp",
-                                 Polygon.Cell0DsCoordinates,
-                                 Polygon.Cell1DsExtrema
-                                 );
-    }
 	
 	return 0;
 }
