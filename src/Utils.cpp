@@ -807,9 +807,10 @@ void FileTxt(const Polygonal& mesh)
 	printout3.close();
 }
 
+/*
 bool TriangTotC_2(int b,int c, Polygonal& mesh, Polygonal& meshTriang2){
 	Polygonal meshT1;
-	TriangTotC_1(b, c, mesh, meshT1) //creo la triangolazione di tipo 1
+	TriangTotC_1(b, c, mesh, meshT1); //creo la triangolazione di tipo 1
 	
 	//RISERVA GLI SPAZI!!!!!!!
 	//calcolo tutti i baricentri
@@ -872,3 +873,4 @@ bool TriangTotC_2(int b,int c, Polygonal& mesh, Polygonal& meshTriang2){
 	}
 	
 }
+*/

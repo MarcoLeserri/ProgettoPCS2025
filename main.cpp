@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 			}
 			
 			if(abs(q-3) < err) {
-				DualTot(PolygTriang, PolygDual)
+				DualTot(PolygTriang, PolygDual);
 				
 				if(abs(argc - 7) > err){
 					
@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
 
     {
         utilities.ExportSegments("./Cell1Ds.inp",
-                                 PolygonDual.Cell0DsCoordinates,
-                                 PolygonDual.Cell1DsExtrema
+                                 PolygDual.Cell0DsCoordinates,
+                                 PolygDual.Cell1DsExtrema
                                  );
     }
 					
