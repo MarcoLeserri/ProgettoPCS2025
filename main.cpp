@@ -46,9 +46,10 @@ int main(int argc, char *argv[])
 			//triangolazione poligono
 			TriangTotC_1(b, c, Polygon, PolygTriang);
 
-			FileTxt(PolygTriang);
 			
 			if (abs(q-3) > err){
+				
+				FileTxt(PolygTriang);
 				
 				Gedim::UCDUtilities utilities;
     {
@@ -70,6 +71,8 @@ int main(int argc, char *argv[])
 				DualTot(PolygTriang, PolygDual);
 				
 				if(abs(argc - 7) > err){
+					
+					FileTxt(PolygDual);
 					
 					Gedim::UCDUtilities utilities;
     {
